@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanguArt Trading - AI Simulation</title>
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0b;
+            --card-bg: #161618;
+            --neon-green: #00ff85;
+            --neon-blue: #00d1ff;
+            --text-main: #ffffff;
+            --text-dim: #8b8b8b;
+            --emola-red: #e6192e;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Barre Latérale */
+        .sidebar {
+            width: 240px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-right: 1px solid #222;
+        }
+
+        .logo { font-size: 22px; font-weight: 800; margin-bottom: 40px; color: var(--neon-blue); }
+        .logo span { color: #fff; }
+
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { 
+            padding: 12px 15px; 
+            color: var(--text-dim); 
+            cursor: pointer; 
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+        }
+        .sidebar li.active { background: #252525; color: #fff; border-left: 3px solid var(--neon-blue); }
+
+        /* Zone Principale */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+
+        .status-badge { 
+            background: rgba(0, 255, 133, 0.1); 
+            color: var(--neon-green); 
+            padding: 6px 15px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            border: 1px solid var(--neon-green);
+        }
+
+        /* Cartes */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .amount { font-size: 42px; font-weight: 800; color: var(--neon-green); margin: 15px 0; }
+        .profit-label { color: var(--neon-green); font-weight: 600; }
+
+        /* Animation Graphique */
+        .fake-chart {
+            height: 120px;
+            margin-top: 20px;
+            background: linear-gradient(0deg, rgba(0,255,133,0.05) 0%, rgba(0,0,0,0) 100%);
+            border-bottom: 2px solid var(--neon-green);
+            position: relative;
+        }
+
+        .chart-line {
+            width: 100%; height: 2px; background: var(--neon-green);
+            position: absolute; bottom: 20px;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        /* Formulaire */
+        input {
+            width: 100%; padding: 14px; margin: 20px 0 10px 0;
+            background: #000; border: 1px solid #333; color: #fff;
+            border-radius: 10px; box-sizing: border-box;
+        }
+
+        button {
+            width: 100%; padding: 16px; background: var(--emola-red);
+            color: #fff; border: none; border-radius: 10px; font-weight: 700;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 25, 46, 0.3); }
+        button:disabled { background: #444; cursor: not-allowed; }
+
+        #payment-status { margin-top: 15px; font-size: 14px; text-align: center; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">VANGU<span>ART</span></div>
+        <ul>
+            <li class="active">Tableau de bord</li>
+            <li>Portefeuille</li>
+            <li>Transactions</li>
+            <li>Sécurité</li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1 style="margin:0">Dashboard Client</h1>
+                <p style="color:var(--text-dim); margin:5px 0 0 0">Simulation de trading IA en temps réel</p>
+            </div>
+            <div class="status-badge">● IA ACTIVE</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h3 style="margin:0; color:var(--text-dim)">Solde Total (MT)</h3>
+                <div class="amount"><span id="balance">2500.00</span></div>
+                <div class="profit-label">↑ <span id="percent">0.00</span>% (Gains simulés)</div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin:0; color:var(--text-dim)">Performance 24h</h3>
+                <div class="fake-chart">
+                    <div class="chart-line"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin:0; color:var(--text-dim)">Recharger le compte</h3>
+                <input type="number" id="deposit-input" placeholder="Montant (ex: 500)">
+                <button id="pay-btn" onclick="processPayment()">Déposer via e-Mola</button>
+                <div id="payment-status"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentBalance = 2500.00;
+        let currentPercent = 0.00;
+
+        // Fonction pour faire monter le solde automatiquement
+        function liveUpdate() {
+            // Simulation de gain aléatoire entre 0.05 et 0.20 MT
+            let gain = (Math.random() * 0.15) + 0.05;
+            currentBalance += gain;
+            currentPercent += 0.001;
+
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+            document.getElementById('percent').innerText = currentPercent.toFixed(3);
+        }
+
+        // Mise à jour toutes les 2 secondes
+        setInterval(liveUpdate, 2000);
+
+        // Simulation du flux e-Mola
+        function processPayment() {
+            const amount = document.getElementById('deposit-input').value;
+            const btn = document.getElementById('pay-btn');
+            const status = document.getElementById('payment-status');
+
+            if (!amount || amount <= 0) {
+                alert("Entrez un montant valide.");
+                return;
+            }
+
+            // Désactive le bouton pour simuler l'attente
+            btn.disabled = true;
+            btn.innerText = "Traitement USSD...";
+            status.style.color = "#ffa500";
+            status.innerText = "Vérifiez votre téléphone pour confirmer le paiement de " + amount + " MT.";
+
+            // Simule la réception du paiement après 5 secondes
+            setTimeout(() => {
+                status.style.color = "#00ff85";
+                status.innerText = "✓ Paiement confirmé ! Solde mis à jour.";
+                
+                // Ajoute le montant au solde
+                currentBalance += parseFloat(amount);
+                document.getElementById('balance').innerText = currentBalance.toFixed(2);
+
+                // Réinitialise le bouton après 3 secondes
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Déposer via e-Mola";
+                    document.getElementById('deposit-input').value = "";
+                }, 3000);
+
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
