@@ -1,238 +1,117 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VanguArt Premium - AI Crypto Trading</title>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <style>
-        :root {
-            --bg-dark: #050506;
-            --card-bg: rgba(23, 23, 26, 0.6);
-            --sidebar-bg: #0a0a0c;
-            --neon-green: #00ff85;
-            --neon-blue: #00d1ff;
-            --neon-gold: #ffc107;
-            --text-main: #ffffff;
-            --text-dim: #8b8b8b;
-            --emola-red: #e6192e;
-            --border: rgba(255, 255, 255, 0.04);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-        * { box-sizing: border-box; font-family: 'SF Pro Display', -apple-system, sans-serif; outline: none; }
-        body { margin: 0; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+    let balance = 2500.00;
+    const FRAIS_RETRAIT = 0.10;
 
-        /* --- SIDEBAR --- */
-        .sidebar { width: 280px; background: var(--sidebar-bg); padding: 30px; border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; backdrop-filter: blur(10px); }
-        .logo { font-size: 26px; font-weight: 900; color: var(--neon-blue); margin-bottom: 40px; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; }
-        .logo span { color: #fff; font-weight: 300; }
-        .logo-dot { width: 10px; height: 10px; background: var(--neon-blue); border-radius: 50%; box-shadow: 0 0 15px var(--neon-blue); }
-        .sidebar ul { list-style: none; padding: 0; flex-grow: 1; }
-        .sidebar li { padding: 16px 20px; color: var(--text-dim); cursor: pointer; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 15px; font-size: 15px; transition: 0.3s; }
-        .sidebar li:hover, .sidebar li.active { background: rgba(0, 209, 255, 0.1); color: var(--neon-blue); font-weight: 700; }
+    let transactions = [
+        { id: 1, date: '27/03/2026', type: 'IA PROFIT', amt: 45.20, ref: 'AUTO', status: 'done' }
+    ];
 
-        /* --- MAIN --- */
-        .main { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
-        .view { display: none; animation: fadeIn 0.4s ease; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+    function showView(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 30px; backdrop-filter: blur(12px); box-shadow: var(--glass-shadow); }
-        .amount { font-size: 48px; font-weight: 900; color: var(--neon-green); margin: 15px 0; }
-        .amount span { font-size: 20px; color: var(--text-dim); }
+    window.showView = showView;
 
-        /* --- TABLES --- */
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-dim); padding: 15px; border-bottom: 1px solid var(--border); font-size: 12px; }
-        td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.01); font-size: 14px; }
-        .status-badge { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .s-wait { background: rgba(255, 193, 7, 0.1); color: var(--neon-gold); }
-        .s-done { background: rgba(0, 255, 133, 0.1); color: var(--neon-green); }
-        .s-fail { background: rgba(230, 25, 46, 0.1); color: var(--emola-red); }
-
-        /* --- DEPOSIT BOX --- */
-        .depo-instruction { background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(0, 0, 0, 0) 100%); border: 1px solid rgba(255, 193, 7, 0.2); padding: 25px; border-radius: 16px; margin-bottom: 25px; }
-        .merch-code { font-size: 36px; font-weight: 900; color: #fff; letter-spacing: 2px; display: block; margin: 10px 0; }
-
-        input { width: 100%; padding: 18px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: #fff; border-radius: 14px; font-size: 16px; margin-bottom: 20px; }
-        button { width: 100%; padding: 18px; background: var(--neon-blue); color: #000; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .btn-red { background: var(--emola-red); color: #fff; }
-
-        .admin-trigger { margin-top: auto; font-size: 11px; color: #1a1a1a; cursor: pointer; text-align: center; padding: 12px; }
-
-        @media (max-width: 850px) {
-            .sidebar { display: none; }
-            .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0c; border-top: 1px solid var(--border); z-index: 1000; padding: 15px; justify-content: space-around; }
-            .mobile-nav div { color: var(--text-dim); font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
-            .mobile-nav .active { color: var(--neon-blue); }
-            .main { padding: 20px; padding-bottom: 100px; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav class="sidebar">
-        <div class="logo"><div class="logo-dot"></div>VANGU<span>ART</span></div>
-        <ul>
-            <li class="active" onclick="showView('v-dash')">Dashboard</li>
-            <li onclick="showView('v-depot')">Déposer</li>
-            <li onclick="showView('v-retrait')">Retirer</li>
-        </ul>
-        <div class="admin-trigger" onclick="accessAdmin()">🔒 ACCÈS ADMIN</div>
-    </nav>
-
-    <div class="mobile-nav">
-        <div onclick="showView('v-dash')">Dash</div>
-        <div onclick="showView('v-depot')">Dépôt</div>
-        <div onclick="showView('v-retrait')">Retrait</div>
-    </div>
-
-    <main class="main">
-        <section id="v-dash" class="view active">
-            <h1>Tableau de Bord</h1>
-            <div class="card">
-                <div style="color:var(--text-dim)">Valeur Portefeuille</div>
-                <div class="amount"><span id="display-bal">2 500.00</span> <span>MZN</span></div>
-                <div id="main-chart"></div>
-            </div>
-            <h3>Historique Transactions</h3>
-            <div class="card" style="padding:10px;">
-                <table>
-                    <thead><tr><th>Date</th><th>Type</th><th>Montant</th><th>Statut</th></tr></thead>
-                    <tbody id="user-trans-list"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="v-depot" class="view">
-            <h1>Dépôt e-Mola</h1>
-            <div class="depo-instruction">
-                <div style="font-weight: 800; color:var(--neon-gold)">PAIEMENT MARCHAND</div>
-                <p style="color:#ccc; font-size: 14px;">Envoyez les fonds vers :</p>
-                <span class="merch-code">300032</span>
-                <small style="color:var(--text-dim)">Bénéficiaire: VANGUART TRADING Lda</small>
-            </div>
-            <div class="card">
-                <input type="number" id="in-depo-amt" placeholder="Montant envoyé (MZN)">
-                <input type="text" id="in-depo-ref" placeholder="Référence SMS">
-                <button onclick="submitAction('DEPOT')">Valider le dépôt</button>
-            </div>
-        </section>
-
-        <section id="v-retrait" class="view">
-            <h1>Retrait Express (Frais 10%)</h1>
-            <div class="card">
-                <input type="number" id="in-ret-amt" placeholder="Montant à retirer (MT)">
-                <input type="number" id="in-ret-num" placeholder="Numéro e-Mola / M-Pesa">
-                <p id="fee-preview" style="font-size: 12px; color: var(--text-dim); margin-top: -10px; margin-bottom: 20px;"></p>
-                <button class="btn-red" onclick="submitAction('RETRAIT')">Confirmer le Retrait</button>
-            </div>
-        </section>
-
-        <section id="v-admin" class="view">
-            <h1>Panel de Gestion 300032</h1>
-            <div class="card" style="padding:0">
-                <table>
-                    <thead><tr><th>Type</th><th>Montant Brut</th><th>Destinataire</th><th>Action</th></tr></thead>
-                    <tbody id="admin-list"></tbody>
-                </table>
-            </div>
-            <button onclick="showView('v-dash')" style="background:#222; color:#fff; margin-top:20px;">Quitter Admin</button>
-        </section>
-    </main>
-
-    <script>
-        let balance = 2500.00;
-        const FRAIS_RETRAIT = 0.10;
-        let transactions = [
-            { id: 1, date: '27/03/2026', type: 'IA PROFIT', amt: 45.20, ref: 'AUTO', status: 'done' }
-        ];
-
-        function showView(id) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        // Calcul des frais en temps réel
-        document.getElementById('in-ret-amt').addEventListener('input', function(e) {
+    // ✅ FIX EVENT LISTENER
+    const inputRet = document.getElementById('in-ret-amt');
+    if (inputRet) {
+        inputRet.addEventListener('input', function (e) {
             const val = parseFloat(e.target.value);
-            if(val > 0) {
+            if (val > 0) {
                 const frais = val * FRAIS_RETRAIT;
                 const net = val - frais;
-                document.getElementById('fee-preview').innerText = `Frais: ${frais.toFixed(2)} MT | Vous recevrez: ${net.toFixed(2)} MT`;
+                document.getElementById('fee-preview').innerText =
+                    `Frais: ${frais.toFixed(2)} MT | Vous recevrez: ${net.toFixed(2)} MT`;
             } else {
                 document.getElementById('fee-preview').innerText = "";
             }
         });
+    }
 
-        function submitAction(type) {
-            const amtIn = (type === 'DEPOT') ? 'in-depo-amt' : 'in-ret-amt';
-            const refIn = (type === 'DEPOT') ? 'in-depo-ref' : 'in-ret-num';
-            const amt = parseFloat(document.getElementById(amtIn).value);
-            const ref = document.getElementById(refIn).value;
+    function submitAction(type) {
+        const amtIn = (type === 'DEPOT') ? 'in-depo-amt' : 'in-ret-amt';
+        const refIn = (type === 'DEPOT') ? 'in-depo-ref' : 'in-ret-num';
 
-            if(!amt || !ref) return alert("Veuillez remplir les champs.");
+        const amt = parseFloat(document.getElementById(amtIn).value);
+        const ref = document.getElementById(refIn).value;
 
-            if(type === 'RETRAIT') {
-                if(amt > balance) return alert("❌ Solde insuffisant ! Max: " + balance + " MT");
-                if(!confirm(`Confirmer le retrait ?\nMontant Brut: ${amt} MT\nFrais (10%): ${(amt*0.1).toFixed(2)} MT\nRéception Net: ${(amt*0.9).toFixed(2)} MT`)) return;
-            }
+        if (!amt || !ref) return alert("Veuillez remplir les champs.");
 
-            transactions.unshift({
-                id: Date.now(),
-                date: new Date().toLocaleDateString(),
-                type: type,
-                amt: amt,
-                ref: ref,
-                status: 'wait'
-            });
-
-            alert("Demande envoyée avec succès.");
-            updateUI();
-            showView('v-dash');
+        if (type === 'RETRAIT') {
+            if (amt > balance) return alert("❌ Solde insuffisant !");
+            if (!confirm(`Confirmer ?\nNet: ${(amt * 0.9).toFixed(2)} MT`)) return;
         }
 
-        function accessAdmin() {
-            if(prompt("Code Admin :") === "2024") showView('v-admin');
+        transactions.unshift({
+            id: Date.now(),
+            date: new Date().toLocaleDateString(),
+            type: type,
+            amt: amt,
+            ref: ref,
+            status: 'wait'
+        });
+
+        alert("Demande envoyée !");
+        updateUI();
+        showView('v-dash');
+    }
+
+    window.submitAction = submitAction;
+
+    function accessAdmin() {
+        if (prompt("Code Admin :") === "2024") showView('v-admin');
+    }
+
+    window.accessAdmin = accessAdmin;
+
+    function process(id, state) {
+        const tx = transactions.find(t => t.id === id);
+
+        if (state === 'done') {
+            tx.status = 'done';
+            balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
+        } else {
+            tx.status = 'fail';
         }
 
-        function process(id, state) {
-            const tx = transactions.find(t => t.id === id);
-            if(state === 'done') {
-                tx.status = 'done';
-                balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
-            } else {
-                tx.status = 'fail';
-            }
-            updateUI();
-        }
+        updateUI();
+    }
 
-        function updateUI() {
-            document.getElementById('display-bal').innerText = balance.toLocaleString('fr-FR', {minimumFractionDigits: 2});
-            
-            document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
+    window.process = process;
+
+    function updateUI() {
+        document.getElementById('display-bal').innerText =
+            balance.toLocaleString('fr-FR', { minimumFractionDigits: 2 });
+
+        document.getElementById('user-trans-list').innerHTML =
+            transactions.map(t => `
                 <tr>
                     <td>${t.date}</td>
                     <td>${t.type}</td>
-                    <td style="color:${t.type.includes('PROFIT')?'var(--neon-green)':'#fff'}">${t.amt.toFixed(2)} MT</td>
+                    <td>${t.amt.toFixed(2)} MT</td>
                     <td><span class="status-badge s-${t.status}">${t.status}</span></td>
                 </tr>
             `).join('');
 
-            document.getElementById('admin-list').innerHTML = transactions.filter(t => t.status === 'wait').map(t => `
+        document.getElementById('admin-list').innerHTML =
+            transactions.filter(t => t.status === 'wait').map(t => `
                 <tr>
                     <td>${t.type}</td>
                     <td><b>${t.amt} MT</b></td>
-                    <td><small>${t.ref}</small><br><span style="color:var(--neon-gold)">Net: ${(t.type==='RETRAIT'?t.amt*0.9:t.amt).toFixed(2)} MT</span></td>
+                    <td>${t.ref}</td>
                     <td>
-                        <button onclick="process(${t.id}, 'done')" style="padding:8px; width:45px; background:var(--neon-green)">OK</button>
-                        <button onclick="process(${t.id}, 'fail')" style="padding:8px; width:45px; background:var(--emola-red)">X</button>
+                        <button onclick="process(${t.id}, 'done')">OK</button>
+                        <button onclick="process(${t.id}, 'fail')">X</button>
                     </td>
                 </tr>
             `).join('');
-        }
+    }
 
+    // ✅ FIX CHART (sécurisé)
+    if (window.ApexCharts) {
         new ApexCharts(document.querySelector("#main-chart"), {
             series: [{ name: 'Balance', data: [2100, 2300, 2200, 2400, 2500] }],
             chart: { height: 180, type: 'area', sparkline: { enabled: true } },
@@ -240,8 +119,8 @@
             stroke: { curve: 'smooth', width: 3 },
             fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0 } }
         }).render();
+    }
 
-        updateUI();
-    </script>
-</body>
-</html>
+    updateUI();
+});
+</script>
