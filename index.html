@@ -3,260 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguard - e-Mola Trading</title>
+    <title>Vanguard - e-Mola Intelligence</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0b0f19;
-            --card: #161b28;
+            --bg: #05070a;
+            --card: rgba(22, 27, 40, 0.8);
             --accent: #00ff85;
             --text: #ffffff;
             --danger: #ff4d4d;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
+            background-image: radial-gradient(circle at top right, #0a1f16, transparent);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        .container { max-width: 500px; margin: auto; }
-
-        /* Navigation */
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        button { 
-            background: var(--card); color: white; border: 1px solid #333; 
-            padding: 10px; border-radius: 8px; cursor: pointer; flex: 1;
+        /* --- SPLASH SCREEN --- */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            transition: opacity 0.8s ease;
         }
-        button:hover { border-color: var(--accent); }
-        .btn-main { background: var(--accent); color: #000; font-weight: bold; }
+        .loader {
+            width: 50px; height: 50px; border: 3px solid var(--glass);
+            border-top: 3px solid var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Views */
-        .view { display: none; }
-        .view.active { display: block; }
+        /* --- LAYOUT --- */
+        .container { max-width: 450px; margin: auto; padding: 20px; padding-bottom: 100px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .live-tag { font-size: 0.7rem; background: rgba(0,255,133,0.1); color: var(--accent); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* Dashboard */
+        /* --- GLASS CARDS --- */
         .card { 
-            background: var(--card); padding: 20px; border-radius: 15px; 
-            margin-bottom: 20px; text-align: center;
+            background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 20px; border-radius: 24px; border: 1px solid var(--glass);
+            margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        #display-bal { font-size: 2rem; color: var(--accent); font-weight: bold; }
 
-        /* Forms */
+        #display-bal { font-size: 2.2rem; color: var(--text); font-weight: 800; margin: 10px 0; }
+        .currency { color: var(--accent); font-size: 1rem; margin-left: 5px; }
+
+        /* --- NAV BAR (Bottom) --- */
+        .nav-bottom {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: rgba(15, 20, 30, 0.9);
+            backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--glass);
+            display: flex; justify-content: space-around; padding: 15px; z-index: 100;
+        }
+        .nav-item { color: #666; font-size: 1.2rem; cursor: pointer; transition: 0.3s; position: relative; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
+
+        /* --- ELEMENTS --- */
+        .view { display: none; animation: fadeIn 0.4s ease-out; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         input {
-            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
-            border: 1px solid #333; background: #0b0f19; color: white; box-sizing: border-box;
+            width: 100%; padding: 15px; margin: 12px 0; border-radius: 12px;
+            border: 1px solid var(--glass); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;
+            outline: none; transition: 0.3s;
         }
-        .fee-info { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; display: block; }
+        input:focus { border-color: var(--accent); }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; font-size: 0.9rem; }
-        .status-badge { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; }
-        .s-done { background: rgba(0, 255, 133, 0.2); color: var(--accent); }
-        .s-wait { background: rgba(255, 165, 0, 0.2); color: orange; }
-        .s-fail { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
+        .btn-main { 
+            background: var(--accent); color: #000; border: none; width: 100%;
+            padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer;
+            transition: 0.3s; font-size: 1rem; margin-top: 10px;
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* --- NOTIFICATION TOAST --- */
+        #toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: black; padding: 12px 25px; border-radius: 50px;
+            font-weight: bold; font-size: 0.9rem; transition: 0.5s; z-index: 10000;
+            box-shadow: 0 5px 15px rgba(0,255,133,0.3);
+        }
+
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; padding-bottom: 10px; }
+        td { padding: 12px 0; border-bottom: 1px solid var(--glass); font-size: 0.9rem; }
+        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
+        .s-done { color: var(--accent); background: rgba(0,255,133,0.1); }
+        .s-wait { color: #ffab00; background: rgba(255,171,0,0.1); }
     </style>
 </head>
 <body>
 
+<div id="toast">Transaction réussie !</div>
+
+<div id="splash">
+    <div class="loader"></div>
+    <h2 style="letter-spacing: 2px;">VANGUARD</h2>
+    <p style="color: #666; font-size: 0.8rem;">Initialisation de l'IA Trading...</p>
+</div>
+
 <div class="container">
-    <div class="nav">
-        <button onclick="showView('v-dash')">Tableau</button>
-        <button onclick="showView('v-depo')">Dépôt</button>
-        <button onclick="showView('v-ret')">Retrait</button>
-        <button onclick="accessAdmin()" style="flex:0.3">⚙️</button>
+    <div class="header">
+        <h3 style="margin:0; font-weight: 300;">Bonjour, <span style="font-weight: 700;">Trader</span></h3>
+        <div class="live-tag">● LIVE MARKET</div>
     </div>
 
     <div id="v-dash" class="view active">
         <div class="card">
-            <small>Solde Disponible</small>
-            <div id="display-bal">2 500,00 MT</div>
-            <div id="main-chart"></div>
+            <small style="color: #888;">Solde Total e-Mola</small>
+            <div id="display-bal">2 500,00 <span class="currency">MT</span></div>
+            <div id="main-chart" style="margin-top: 15px;"></div>
         </div>
 
-        <h3>Historique</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Montant</th>
-                    <th>Statut</th>
-                </tr>
-            </thead>
-            <tbody id="user-trans-list"></tbody>
-        </table>
+        <h4 style="margin-top: 30px; display: flex; justify-content: space-between;">
+            Activités Récentes 
+            <span style="font-size: 0.7rem; color: var(--accent); cursor:pointer;" onclick="accessAdmin()">AGENT PORTAL</span>
+        </h4>
+        <div class="card" style="padding: 10px 20px;">
+            <table>
+                <thead><tr><th>Type</th><th>Montant</th><th>Statut</th></tr></thead>
+                <tbody id="user-trans-list"></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="v-depo" class="view">
         <div class="card">
-            <h3>Dépôt e-Mola</h3>
-            <p><small>Envoyez vers l'agent : <b>84XXXXXXX</b></small></p>
+            <h3>Dépôt Instantané</h3>
+            <p style="font-size: 0.85rem; color: #888;">Envoyez le montant vers notre compte agent e-Mola :</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px dashed var(--accent);">
+                <span style="color: var(--accent); font-size: 1.2rem; font-weight: bold;">84 300 032</span>
+            </div>
             <input type="number" id="in-depo-amt" placeholder="Montant (MT)">
             <input type="text" id="in-depo-ref" placeholder="ID de transaction e-Mola">
-            <button class="btn-main" onclick="submitAction('DEPOT')">Confirmer le Dépôt</button>
+            <button class="btn-main" onclick="submitAction('DEPOT')">VÉRIFIER LE DÉPÔT</button>
         </div>
     </div>
 
     <div id="v-ret" class="view">
         <div class="card">
-            <h3>Retrait e-Mola</h3>
+            <h3>Retrait Fonds</h3>
             <input type="number" id="in-ret-amt" placeholder="Montant à retirer">
-            <span id="fee-preview" class="fee-info"></span>
+            <div id="fee-preview" style="font-size: 0.8rem; margin: 5px 0 15px 5px; color: #888;"></div>
             <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85)">
-            <button class="btn-main" onclick="submitAction('RETRAIT')">Demander le Retrait</button>
+            <button class="btn-main" onclick="submitAction('RETRAIT')" style="background: #fff;">DEMANDER LE RETRAIT</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h3>Gestion des demandes</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Montant</th>
-                    <th>Réf/Num</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="admin-list"></tbody>
-        </table>
-        <button onclick="showView('v-dash')" style="margin-top:20px">Quitter Admin</button>
+        <div class="card">
+            <h3>Portal Agent</h3>
+            <table id="admin-table">
+                <tbody id="admin-list"></tbody>
+            </table>
+            <button class="btn-main" onclick="showView('v-dash')" style="background: #333; color: #fff;">Fermer</button>
+        </div>
     </div>
 </div>
 
+<div class="nav-bottom">
+    <div class="nav-item active" onclick="showView('v-dash', this)"><i class="fas fa-chart-pie"></i></div>
+    <div class="nav-item" onclick="showView('v-depo', this)"><i class="fas fa-plus-circle"></i></div>
+    <div class="nav-item" onclick="showView('v-ret', this)"><i class="fas fa-wallet"></i></div>
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // 1. Initialisation des données
     let balance = 2500.00;
-    const FRAIS_RETRAIT = 0.10; // 10% de frais
     let transactions = [
-        { id: 1, date: '27/03/2026', type: 'IA PROFIT', amt: 45.20, ref: 'AUTO', status: 'done' }
+        { id: 1, date: 'Aujourd\'hui', type: 'IA PROFIT', amt: 12.40, status: 'done' }
     ];
 
-    // 2. Navigation
-    window.showView = function(id) {
+    // --- INITIALISATION ---
+    window.onload = () => {
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
+        }, 2500);
+        updateUI();
+        initChart();
+        simulateTrading();
+    };
+
+    // --- NAVIGATION ---
+    function showView(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        const target = document.getElementById(id);
-        if (target) target.classList.add('active');
-    };
-
-    window.accessAdmin = function() {
-        const code = prompt("Code Agent Admin :");
-        if (code === "2024") showView('v-admin');
-        else if (code !== null) alert("Accès refusé.");
-    };
-
-    // 3. Calcul des frais en temps réel
-    const inRetAmt = document.getElementById('in-ret-amt');
-    if (inRetAmt) {
-        inRetAmt.addEventListener('input', function() {
-            const val = parseFloat(this.value);
-            const preview = document.getElementById('fee-preview');
-            if (val > 0) {
-                const frais = val * FRAIS_RETRAIT;
-                const net = val - frais;
-                preview.innerText = `Frais (10%): ${frais.toFixed(2)} MT | Vous recevrez: ${net.toFixed(2)} MT`;
-            } else {
-                preview.innerText = "";
-            }
-        });
+        document.getElementById(id).classList.add('active');
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
     }
 
-    // 4. Soumission d'une transaction
-    window.submitAction = function(type) {
-        const amtInput = (type === 'DEPOT') ? 'in-depo-amt' : 'in-ret-amt';
-        const refInput = (type === 'DEPOT') ? 'in-depo-ref' : 'in-ret-num';
+    // --- NOTIFICATIONS ---
+    function notify(text) {
+        const t = document.getElementById('toast');
+        t.innerText = text;
+        t.style.top = '20px';
+        setTimeout(() => t.style.top = '-100px', 3000);
+    }
 
-        const amt = parseFloat(document.getElementById(amtInput).value);
-        const ref = document.getElementById(refInput).value.trim();
+    // --- ACTIONS ---
+    function submitAction(type) {
+        const amt = parseFloat(document.getElementById(type === 'DEPOT' ? 'in-depo-amt' : 'in-ret-amt').value);
+        if(!amt) return notify("Veuillez entrer un montant");
 
-        if (isNaN(amt) || amt <= 0 || ref === "") return alert("Champs invalides.");
+        notify("Analyse de la transaction...");
+        
+        setTimeout(() => {
+            transactions.unshift({
+                id: Date.now(),
+                date: 'Maintenant',
+                type: type,
+                amt: amt,
+                status: 'wait'
+            });
+            updateUI();
+            showView('v-dash');
+            notify("Demande transmise à l'agent");
+        }, 1500);
+    }
 
-        if (type === 'RETRAIT' && amt > balance) return alert("Solde insuffisant.");
-
-        transactions.unshift({
-            id: Date.now() + Math.random(),
-            date: new Date().toLocaleDateString('fr-FR'),
-            type: type,
-            amt: amt,
-            ref: ref,
-            status: 'wait'
-        });
-
-        alert("Demande envoyée ! En attente de validation agent.");
-        document.getElementById(amtInput).value = "";
-        document.getElementById(refInput).value = "";
-        updateUI();
-        showView('v-dash');
-    };
-
-    // 5. Validation Admin (Agent)
-    window.process = function(id, state) {
+    function process(id, state) {
         const tx = transactions.find(t => t.id === id);
-        if (!tx) return;
-
-        if (state === 'done') {
-            tx.status = 'done';
+        if(state === 'done') {
             balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
+            tx.status = 'done';
+            notify("Approuvé !");
         } else {
             tx.status = 'fail';
         }
         updateUI();
-    };
-
-    // 6. Mise à jour Interface
-    function updateUI() {
-        const balEl = document.getElementById('display-bal');
-        if (balEl) balEl.innerText = balance.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " MT";
-
-        const userList = document.getElementById('user-trans-list');
-        if (userList) {
-            userList.innerHTML = transactions.map(t => `
-                <tr>
-                    <td>${t.date}</td>
-                    <td>${t.type}</td>
-                    <td>${t.amt.toFixed(2)} MT</td>
-                    <td><span class="status-badge s-${t.status}">${t.status}</span></td>
-                </tr>
-            `).join('');
-        }
-
-        const adminList = document.getElementById('admin-list');
-        if (adminList) {
-            const pending = transactions.filter(t => t.status === 'wait');
-            adminList.innerHTML = pending.length > 0 ? pending.map(t => `
-                <tr>
-                    <td>${t.type}</td>
-                    <td>${t.amt} MT</td>
-                    <td>${t.ref}</td>
-                    <td>
-                        <button onclick="process(${t.id}, 'done')">✔️</button>
-                        <button onclick="process(${t.id}, 'fail')">❌</button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="4">Aucune attente</td></tr>';
-        }
     }
 
-    // 7. Graphique
-    if (window.ApexCharts) {
+    function accessAdmin() {
+        if(prompt("Code Secret Agent:") === "2024") showView('v-admin');
+    }
+
+    // --- LIVE SIMULATION ---
+    function simulateTrading() {
+        setInterval(() => {
+            if(Math.random() > 0.7) {
+                let profit = (Math.random() * 2).toFixed(2);
+                balance += parseFloat(profit);
+                transactions.unshift({ id: Date.now(), date: 'Live', type: 'IA PROFIT', amt: parseFloat(profit), status: 'done' });
+                if(transactions.length > 8) transactions.pop();
+                updateUI();
+                // Petit flash vert sur le solde
+                document.getElementById('display-bal').style.color = 'var(--accent)';
+                setTimeout(() => document.getElementById('display-bal').style.color = 'white', 500);
+            }
+        }, 10000);
+    }
+
+    function updateUI() {
+        document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="currency">MT</span>`;
+        
+        document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
+            <tr>
+                <td>${t.type}</td>
+                <td style="font-weight:bold">${t.amt.toFixed(2)}</td>
+                <td><span class="status-badge s-${t.status}">${t.status.toUpperCase()}</span></td>
+            </tr>
+        `).join('');
+
+        const pending = transactions.filter(t => t.status === 'wait');
+        document.getElementById('admin-list').innerHTML = pending.map(t => `
+            <tr>
+                <td>${t.type} (${t.amt}MT)</td>
+                <td style="text-align:right">
+                    <button onclick="process(${t.id}, 'done')" style="background:var(--accent); border:none; border-radius:5px; padding:5px 10px;">OK</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function initChart() {
         new ApexCharts(document.querySelector("#main-chart"), {
-            series: [{ name: 'Balance', data: [2100, 2300, 2200, 2400, 2500] }],
-            chart: { height: 120, type: 'area', sparkline: { enabled: true } },
+            series: [{ name: 'Profit IA', data: [31, 40, 28, 51, 42, 109, 100] }],
+            chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
             colors: ['#00ff85'],
             stroke: { curve: 'smooth', width: 2 },
-            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } }
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+            tooltip: { enabled: false }
         }).render();
     }
-
-    updateUI();
-});
 </script>
 
 </body>
-        </html>
-    
+    </html>
+                
