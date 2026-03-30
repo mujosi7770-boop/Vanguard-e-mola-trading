@@ -4,303 +4,327 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanguard - e-Mola Intelligence</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'v-bg': '#05070a',
+                        'v-card': 'rgba(22, 27, 40, 0.8)',
+                        'v-accent': '#00ff85',
+                        'v-danger': '#ff4d4d',
+                        'v-text': '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        :root {
-            --bg: #05070a;
-            --card: rgba(22, 27, 40, 0.8);
-            --accent: #00ff85;
-            --text: #ffffff;
-            --danger: #ff4d4d;
-            --glass: rgba(255, 255, 255, 0.05);
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at top right, #0a1f16, transparent);
-            color: var(--text);
-            margin: 0;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        /* --- SPLASH SCREEN --- */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 9999;
-            transition: opacity 0.8s ease;
-        }
-        .loader {
-            width: 50px; height: 50px; border: 3px solid var(--glass);
-            border-top: 3px solid var(--accent); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 15px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- LAYOUT --- */
-        .container { max-width: 450px; margin: auto; padding: 20px; padding-bottom: 100px; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #05070a; color: white; overflow-x: hidden; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .live-tag { font-size: 0.7rem; background: rgba(0,255,133,0.1); color: var(--accent); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--accent); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        /* --- GLASS CARDS --- */
-        .card { 
-            background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 20px; border-radius: 24px; border: 1px solid var(--glass);
-            margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        #display-bal { font-size: 2.2rem; color: var(--text); font-weight: 800; margin: 10px 0; }
-        .currency { color: var(--accent); font-size: 1rem; margin-left: 5px; }
-
-        /* --- NAV BAR (Bottom) --- */
-        .nav-bottom {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; background: rgba(15, 20, 30, 0.9);
-            backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--glass);
-            display: flex; justify-content: space-around; padding: 15px; z-index: 100;
-        }
-        .nav-item { color: #666; font-size: 1.2rem; cursor: pointer; transition: 0.3s; position: relative; }
-        .nav-item.active { color: var(--accent); }
-        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
-
-        /* --- ELEMENTS --- */
+        /* Splash Screen */
+        #splash { transition: opacity 0.8s ease, visibility 0.8s; }
+        .loader { border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid #00ff85; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Glassmorphism */
+        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        
+        /* Navigation animée */
+        .nav-item::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 5px; background: #00ff85; border-radius: 50%; transition: width 0.3s; }
+        .nav-item.active::after { width: 5px; }
+        
+        /* Vue active */
         .view { display: none; animation: fadeIn 0.4s ease-out; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        input {
-            width: 100%; padding: 15px; margin: 12px 0; border-radius: 12px;
-            border: 1px solid var(--glass); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;
-            outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--accent); }
-
-        .btn-main { 
-            background: var(--accent); color: #000; border: none; width: 100%;
-            padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer;
-            transition: 0.3s; font-size: 1rem; margin-top: 10px;
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        /* --- NOTIFICATION TOAST --- */
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--accent); color: black; padding: 12px 25px; border-radius: 50px;
-            font-weight: bold; font-size: 0.9rem; transition: 0.5s; z-index: 10000;
-            box-shadow: 0 5px 15px rgba(0,255,133,0.3);
-        }
-
-        /* --- TABLES --- */
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; padding-bottom: 10px; }
-        td { padding: 12px 0; border-bottom: 1px solid var(--glass); font-size: 0.9rem; }
-        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
-        .s-done { color: var(--accent); background: rgba(0,255,133,0.1); }
+        
+        /* Status Badges */
+        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase; }
+        .s-done { color: #00ff85; background: rgba(0,255,133,0.1); }
         .s-wait { color: #ffab00; background: rgba(255,171,0,0.1); }
+        
+        /* Input focus */
+        input:focus { border-color: #00ff85; box-shadow: 0 0 0 2px rgba(0, 255, 133, 0.2); }
     </style>
 </head>
 <body>
 
-<div id="toast">Transaction réussie !</div>
+    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-v-accent text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000]">Transaction réussie !</div>
 
-<div id="splash">
-    <div class="loader"></div>
-    <h2 style="letter-spacing: 2px;">VANGUARD</h2>
-    <p style="color: #666; font-size: 0.8rem;">Initialisation de l'IA Trading...</p>
-</div>
-
-<div class="container">
-    <div class="header">
-        <h3 style="margin:0; font-weight: 300;">Bonjour, <span style="font-weight: 700;">Trader</span></h3>
-        <div class="live-tag">● LIVE MARKET</div>
+    <div id="splash" class="fixed inset-0 bg-v-bg flex flex-col justify-center items-center z-[9999]">
+        <div class="loader w-12 h-12 rounded-full mb-6"></div>
+        <h2 class="text-3xl font-extrabold tracking-widest text-white">VANGUARD</h2>
+        <p class="text-gray-500 mt-2 text-sm">Initialisation de l'IA Trading...</p>
     </div>
 
-    <div id="v-dash" class="view active">
-        <div class="card">
-            <small style="color: #888;">Solde Total e-Mola</small>
-            <div id="display-bal">2 500,00 <span class="currency">MT</span></div>
-            <div id="main-chart" style="margin-top: 15px;"></div>
+    <div class="container max-w-[450px] mx-auto p-5 pb-24">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-light">Bonjour, <span class="font-bold">Trader</span></h1>
+            <div class="text-[0.7rem] font-bold text-v-accent bg-[rgba(0,255,133,0.1)] px-3 py-1 rounded-full border border-v-accent animate-pulse">● LIVE MARKET</div>
         </div>
 
-        <h4 style="margin-top: 30px; display: flex; justify-content: space-between;">
-            Activités Récentes 
-            <span style="font-size: 0.7rem; color: var(--accent); cursor:pointer;" onclick="accessAdmin()">AGENT PORTAL</span>
-        </h4>
-        <div class="card" style="padding: 10px 20px;">
-            <table>
-                <thead><tr><th>Type</th><th>Montant</th><th>Statut</th></tr></thead>
-                <tbody id="user-trans-list"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="v-depo" class="view">
-        <div class="card">
-            <h3>Dépôt Instantané</h3>
-            <p style="font-size: 0.85rem; color: #888;">Envoyez le montant vers notre compte agent e-Mola :</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; border: 1px dashed var(--accent);">
-                <span style="color: var(--accent); font-size: 1.2rem; font-weight: bold;">84 300 032</span>
+        <div id="v-dash" class="view active">
+            <div class="glass-card p-6 rounded-3xl mb-6">
+                <small class="text-gray-400">Solde Total e-Mola</small>
+                <div id="display-bal" class="text-4xl font-extrabold text-white mt-2 transition-colors duration-500">2 500,00 <span class="text-v-accent text-base font-medium ml-1">MT</span></div>
+                <div id="main-chart" class="mt-4"></div>
             </div>
-            <input type="number" id="in-depo-amt" placeholder="Montant (MT)">
-            <input type="text" id="in-depo-ref" placeholder="ID de transaction e-Mola">
-            <button class="btn-main" onclick="submitAction('DEPOT')">VÉRIFIER LE DÉPÔT</button>
+            
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Activités Récentes</h2>
+                <span onclick="accessAdmin()" class="text-v-accent text-xs cursor-pointer hover:underline">AGENT PORTAL</span>
+            </div>
+            <div class="glass-card p-5 rounded-2xl">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-left text-gray-500 text-xs uppercase"><th>Type</th><th>Montant</th><th>Statut</th></tr></thead>
+                    <tbody id="user-trans-list" class="divide-y divide-[rgba(255,255,255,0.05)]"></tbody>
+                </table>
+            </div>
         </div>
+
+        <div id="v-intel" class="view">
+            <h2 class="text-xl font-bold mb-5">Intelligence Artificielle</h2>
+            <div class="glass-card p-6 rounded-2xl mb-5">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-[rgba(0,255,133,0.1)] rounded-full flex justify-center items-center text-v-accent text-2xl"><i class="fas fa-brain"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg">Moteur d'IA : Vanguard v1.2</h3>
+                        <p class="text-sm text-gray-400">Statut : <span class="text-v-accent font-bold">OPÉRATIONNEL</span></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-center mt-6">
+                    <div class="bg-[rgba(0,0,0,0.3)] p-4 rounded-xl border border-[rgba(255,255,255,0.03)]"><div class="text-xs text-gray-500">Calculs/sec</div><div class="text-2xl font-bold text-v-accent">150k</div></div>
+                    <div class="bg-[rgba(0,0,0,0.3)] p-4 rounded-xl border border-[rgba(255,255,255,0.03)]"><div class="text-xs text-gray-500">Précision</div><div class="text-2xl font-bold">98.5%</div></div>
+                </div>
+            </div>
+            <h3 class="text-lg font-bold mb-4">Analyse en temps réel</h3>
+            <div class="glass-card p-5 rounded-2xl">
+                <div id="logs" class="text-xs font-mono text-gray-500 h-40 overflow-y-auto space-y-2">
+                    <div class="text-v-accent">[INITIALISATION] Système Vanguard actif...</div>
+                    <div>[MARCHÉ] Scan des paires terminé.</div>
+                    <div class="text-gray-400">[IA] Analyse des tendances sur 15min.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="v-depo" class="view">
+            <div class="glass-card p-6 rounded-3xl">
+                <h2 class="text-xl font-bold mb-3">Dépôt Instantané</h2>
+                <p class="text-sm text-gray-400 mb-5">Envoyez le montant vers notre compte agent e-Mola :</p>
+                <div class="bg-[rgba(0,0,0,0.2)] p-4 rounded-xl text-center border-2 border-dashed border-v-accent mb-5">
+                    <span class="text-v-accent text-2xl font-bold tracking-wider">84 300 032</span>
+                </div>
+                <input type="number" id="in-depo-amt" placeholder="Montant (MT)" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-3">
+                <input type="text" id="in-depo-ref" placeholder="ID de transaction e-Mola" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-5">
+                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl text-lg hover:scale-[0.98] transition duration-300" onclick="submitAction('DEPOT')">VÉRIFIER LE DÉPÔT</button>
+            </div>
+        </div>
+
+        <div id="v-ret" class="view">
+            <div class="glass-card p-6 rounded-3xl">
+                <h2 class="text-xl font-bold mb-5">Retrait Fonds</h2>
+                <input type="number" id="in-ret-amt" placeholder="Montant à retirer" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300">
+                <div id="fee-preview" class="text-xs text-gray-500 mt-1 mb-4 ml-1">Frais: 0.00 MT | Net: 0.00 MT</div>
+                <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85)" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-5">
+                <button class="w-full p-4 bg-white text-black font-bold rounded-xl text-lg hover:scale-[0.98] transition duration-300" onclick="submitAction('RETRAIT')">DEMANDER LE RETRAIT</button>
+            </div>
+        </div>
+
+        <div id="v-admin" class="view">
+            <div class="glass-card p-6 rounded-3xl">
+                <h2 class="text-xl font-bold mb-5">Portal Agent (Admin)</h2>
+                <table class="w-full text-sm">
+                    <tbody id="admin-list" class="divide-y divide-[rgba(255,255,255,0.05)]"></tbody>
+                </table>
+                <button class="w-full p-4 bg-gray-700 text-white font-bold rounded-xl text-lg mt-6" onclick="showView('v-dash')">FERMER LE PORTAL</button>
+            </div>
+        </div>
+
     </div>
 
-    <div id="v-ret" class="view">
-        <div class="card">
-            <h3>Retrait Fonds</h3>
-            <input type="number" id="in-ret-amt" placeholder="Montant à retirer">
-            <div id="fee-preview" style="font-size: 0.8rem; margin: 5px 0 15px 5px; color: #888;"></div>
-            <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85)">
-            <button class="btn-main" onclick="submitAction('RETRAIT')" style="background: #fff;">DEMANDER LE RETRAIT</button>
-        </div>
+    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] glass-card rounded-3xl p-4 flex justify-around items-center z-[100]">
+        <div class="nav-item active relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-dash', this)"><i class="fas fa-chart-pie"></i></div>
+        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-intel', this)"><i class="fas fa-brain"></i></div>
+        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-depo', this)"><i class="fas fa-plus-circle"></i></div>
+        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-ret', this)"><i class="fas fa-wallet"></i></div>
     </div>
 
-    <div id="v-admin" class="view">
-        <div class="card">
-            <h3>Portal Agent</h3>
-            <table id="admin-table">
-                <tbody id="admin-list"></tbody>
-            </table>
-            <button class="btn-main" onclick="showView('v-dash')" style="background: #333; color: #fff;">Fermer</button>
-        </div>
-    </div>
-</div>
+    <script>
+        let balance = 2500.00;
+        let transactions = [
+            { id: 1, date: 'Aujourd\'hui', type: 'IA PROFIT', amt: 12.40, status: 'done' }
+        ];
+        const FRAIS_RETRAIT = 0.05; // 5%
 
-<div class="nav-bottom">
-    <div class="nav-item active" onclick="showView('v-dash', this)"><i class="fas fa-chart-pie"></i></div>
-    <div class="nav-item" onclick="showView('v-depo', this)"><i class="fas fa-plus-circle"></i></div>
-    <div class="nav-item" onclick="showView('v-ret', this)"><i class="fas fa-wallet"></i></div>
-</div>
-
-<script>
-    let balance = 2500.00;
-    let transactions = [
-        { id: 1, date: 'Aujourd\'hui', type: 'IA PROFIT', amt: 12.40, status: 'done' }
-    ];
-
-    // --- INITIALISATION ---
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => document.getElementById('splash').style.display = 'none', 800);
-        }, 2500);
-        updateUI();
-        initChart();
-        simulateTrading();
-    };
-
-    // --- NAVIGATION ---
-    function showView(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(el) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-        }
-    }
-
-    // --- NOTIFICATIONS ---
-    function notify(text) {
-        const t = document.getElementById('toast');
-        t.innerText = text;
-        t.style.top = '20px';
-        setTimeout(() => t.style.top = '-100px', 3000);
-    }
-
-    // --- ACTIONS ---
-    function submitAction(type) {
-        const amt = parseFloat(document.getElementById(type === 'DEPOT' ? 'in-depo-amt' : 'in-ret-amt').value);
-        if(!amt) return notify("Veuillez entrer un montant");
-
-        notify("Analyse de la transaction...");
-        
-        setTimeout(() => {
-            transactions.unshift({
-                id: Date.now(),
-                date: 'Maintenant',
-                type: type,
-                amt: amt,
-                status: 'wait'
-            });
+        // --- INITIALISATION ---
+        window.onload = () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.visibility = 'hidden', 800);
+            }, 2500);
             updateUI();
-            showView('v-dash');
-            notify("Demande transmise à l'agent");
-        }, 1500);
-    }
+            initChart();
+            simulateTrading();
+            simulateIntelLogs();
+        };
 
-    function process(id, state) {
-        const tx = transactions.find(t => t.id === id);
-        if(state === 'done') {
-            balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
-            tx.status = 'done';
-            notify("Approuvé !");
-        } else {
-            tx.status = 'fail';
-        }
-        updateUI();
-    }
-
-    function accessAdmin() {
-        if(prompt("Code Secret Agent:") === "2024") showView('v-admin');
-    }
-
-    // --- LIVE SIMULATION ---
-    function simulateTrading() {
-        setInterval(() => {
-            if(Math.random() > 0.7) {
-                let profit = (Math.random() * 2).toFixed(2);
-                balance += parseFloat(profit);
-                transactions.unshift({ id: Date.now(), date: 'Live', type: 'IA PROFIT', amt: parseFloat(profit), status: 'done' });
-                if(transactions.length > 8) transactions.pop();
-                updateUI();
-                // Petit flash vert sur le solde
-                document.getElementById('display-bal').style.color = 'var(--accent)';
-                setTimeout(() => document.getElementById('display-bal').style.color = 'white', 500);
+        // --- NAVIGATION ---
+        function showView(id, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(el) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-v-accent'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.add('text-gray-600'));
+                el.classList.add('active', 'text-v-accent');
+                el.classList.remove('text-gray-600');
             }
-        }, 10000);
-    }
+        }
 
-    function updateUI() {
-        document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="currency">MT</span>`;
-        
-        document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
-            <tr>
-                <td>${t.type}</td>
-                <td style="font-weight:bold">${t.amt.toFixed(2)}</td>
-                <td><span class="status-badge s-${t.status}">${t.status.toUpperCase()}</span></td>
-            </tr>
-        `).join('');
+        // --- TOAST NOTIFICATIONS ---
+        function notify(text) {
+            const t = document.getElementById('toast');
+            t.innerText = text;
+            t.style.top = '20px';
+            setTimeout(() => t.style.top = '-64px', 3000);
+        }
 
-        const pending = transactions.filter(t => t.status === 'wait');
-        document.getElementById('admin-list').innerHTML = pending.map(t => `
-            <tr>
-                <td>${t.type} (${t.amt}MT)</td>
-                <td style="text-align:right">
-                    <button onclick="process(${t.id}, 'done')" style="background:var(--accent); border:none; border-radius:5px; padding:5px 10px;">OK</button>
-                </td>
-            </tr>
-        `).join('');
-    }
+        // --- RETRAIT : CALCUL DES FRAIS ---
+        document.getElementById('in-ret-amt').addEventListener('input', function() {
+            const amt = parseFloat(this.value);
+            const feePreview = document.getElementById('fee-preview');
+            if(amt > 0) {
+                const frais = (amt * FRAIS_RETRAIT).toFixed(2);
+                const net = (amt - frais).toFixed(2);
+                feePreview.innerText = `Frais (${FRAIS_RETRAIT*100}%): ${frais} MT | Vous recevrez: ${net} MT`;
+                feePreview.classList.remove('text-gray-500'); feePreview.classList.add('text-white');
+            } else {
+                feePreview.innerText = "Frais: 0.00 MT | Net: 0.00 MT";
+                feePreview.classList.remove('text-white'); feePreview.classList.add('text-gray-500');
+            }
+        });
 
-    function initChart() {
-        new ApexCharts(document.querySelector("#main-chart"), {
-            series: [{ name: 'Profit IA', data: [31, 40, 28, 51, 42, 109, 100] }],
-            chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-            colors: ['#00ff85'],
-            stroke: { curve: 'smooth', width: 2 },
-            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
-            tooltip: { enabled: false }
-        }).render();
-    }
-</script>
+        // --- SUBMIT ACTIONS (Dépôt/Retrait) ---
+        function submitAction(type) {
+            const inputId = type === 'DEPOT' ? 'in-depo-amt' : 'in-ret-amt';
+            const amt = parseFloat(document.getElementById(inputId).value);
+            if(!amt || amt <= 0) return notify("Veuillez entrer un montant valide");
+            if(type === 'RETRAIT' && amt > balance) return notify("Solde insuffisant");
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Analyse en cours...";
+            btn.disabled = true;
+            notify("Vérification sécurisée...");
+            
+            setTimeout(() => {
+                transactions.unshift({ id: Date.now(), date: 'Maintenant', type: type, amt: amt, status: 'wait' });
+                document.getElementById(inputId).value = ''; // Reset input
+                updateUI();
+                showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+                notify("Demande transmise à l'agent");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // --- ADMIN PROCESS ---
+        function accessAdmin() {
+            if(prompt("Code Secret Agent:") === "2024") showView('v-admin');
+        }
+
+        function process(id, state) {
+            const tx = transactions.find(t => t.id === id);
+            if(state === 'done') {
+                balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
+                tx.status = 'done';
+                notify("Transaction approuvée !");
+            } else {
+                tx.status = 'fail';
+                notify("Transaction refusée");
+            }
+            updateUI();
+        }
+
+        // --- SIMULATIONS (Pour le côté vivant) ---
+        function simulateTrading() {
+            setInterval(() => {
+                if(Math.random() > 0.7) {
+                    let profit = (Math.random() * 2).toFixed(2);
+                    balance += parseFloat(profit);
+                    transactions.unshift({ id: Date.now(), date: 'Live', type: 'IA PROFIT', amt: parseFloat(profit), status: 'done' });
+                    if(transactions.length > 6) transactions.pop(); // Garde l'historique propre
+                    updateUI();
+                    // Petit flash vert sur le solde
+                    document.getElementById('display-bal').classList.add('text-v-accent');
+                    setTimeout(() => document.getElementById('display-bal').classList.remove('text-v-accent'), 500);
+                }
+            }, 12000); // Toutes les 12 secondes
+        }
+
+        function simulateIntelLogs() {
+            const logs = document.getElementById('logs');
+            const messages = [
+                "[IA] Recalcul de l'exposition au risque.",
+                "[MARCHÉ] Signal détecté sur EUR/USD.",
+                "[IA] Ajustement de la stratégie de Scalping.",
+                "[VANGUARD] Analyse de sentiment Twitter.",
+                "[RÉSEAU] Optimisation de la latence de l'API."
+            ];
+            setInterval(() => {
+                if(document.getElementById('v-intel').classList.contains('active')) {
+                    const log = document.createElement('div');
+                    log.innerText = messages[Math.floor(Math.random() * messages.length)];
+                    logs.prepend(log); // Ajoute en haut
+                    if(logs.childNodes.length > 15) logs.removeChild(logs.lastChild);
+                }
+            }, 4000); // Toutes les 4 secondes
+        }
+
+        // --- MISE À JOUR INTERFACE ---
+        function updateUI() {
+            document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-base font-medium ml-1">MT</span>`;
+            
+            document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
+                <tr class="py-3">
+                    <td class="py-3 font-medium">${t.type}</td>
+                    <td class="font-bold text-white">${t.amt.toFixed(2)} MT</td>
+                    <td><span class="status-badge s-${t.status}">${t.status}</span></td>
+                </tr>
+            `).join('');
+
+            const pending = transactions.filter(t => t.status === 'wait');
+            document.getElementById('admin-list').innerHTML = pending.length > 0 ? pending.map(t => `
+                <tr class="py-3">
+                    <td class="py-3 text-white">${t.type} (${t.amt} MT)</td>
+                    <td class="text-right flex gap-2 justify-end">
+                        <button onclick="process(${t.id}, 'done')" class="bg-v-accent text-black font-bold p-2 rounded-lg text-xs hover:scale-105"><i class="fas fa-check"></i></button>
+                        <button onclick="process(${t.id}, 'fail')" class="bg-red-600 text-white font-bold p-2 rounded-lg text-xs hover:scale-105"><i class="fas fa-times"></i></button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="2" class="text-center text-gray-500 py-4">Aucune demande en attente.</td></tr>';
+        }
+
+        function initChart() {
+            new ApexCharts(document.querySelector("#main-chart"), {
+                series: [{ name: 'Profit IA', data: [31, 40, 28, 51, 42, 109, 100] }],
+                chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
+                colors: ['#00ff85'],
+                stroke: { curve: 'smooth', width: 2 },
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+                tooltip: { enabled: false }
+            }).render();
+        }
+    </script>
 
 </body>
     </html>
-                
+    
