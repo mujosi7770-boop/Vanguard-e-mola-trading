@@ -1,74 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguard - e-Mola Trading</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card: #161b28;
+            --accent: #00ff85;
+            --text: #ffffff;
+            --danger: #ff4d4d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 500px; margin: auto; }
+
+        /* Navigation */
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { 
+            background: var(--card); color: white; border: 1px solid #333; 
+            padding: 10px; border-radius: 8px; cursor: pointer; flex: 1;
+        }
+        button:hover { border-color: var(--accent); }
+        .btn-main { background: var(--accent); color: #000; font-weight: bold; }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Dashboard */
+        .card { 
+            background: var(--card); padding: 20px; border-radius: 15px; 
+            margin-bottom: 20px; text-align: center;
+        }
+        #display-bal { font-size: 2rem; color: var(--accent); font-weight: bold; }
+
+        /* Forms */
+        input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+            border: 1px solid #333; background: #0b0f19; color: white; box-sizing: border-box;
+        }
+        .fee-info { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; display: block; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; font-size: 0.9rem; }
+        .status-badge { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; }
+        .s-done { background: rgba(0, 255, 133, 0.2); color: var(--accent); }
+        .s-wait { background: rgba(255, 165, 0, 0.2); color: orange; }
+        .s-fail { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav">
+        <button onclick="showView('v-dash')">Tableau</button>
+        <button onclick="showView('v-depo')">Dépôt</button>
+        <button onclick="showView('v-ret')">Retrait</button>
+        <button onclick="accessAdmin()" style="flex:0.3">⚙️</button>
+    </div>
+
+    <div id="v-dash" class="view active">
+        <div class="card">
+            <small>Solde Disponible</small>
+            <div id="display-bal">2 500,00 MT</div>
+            <div id="main-chart"></div>
+        </div>
+
+        <h3>Historique</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody id="user-trans-list"></tbody>
+        </table>
+    </div>
+
+    <div id="v-depo" class="view">
+        <div class="card">
+            <h3>Dépôt e-Mola</h3>
+            <p><small>Envoyez vers l'agent : <b>84XXXXXXX</b></small></p>
+            <input type="number" id="in-depo-amt" placeholder="Montant (MT)">
+            <input type="text" id="in-depo-ref" placeholder="ID de transaction e-Mola">
+            <button class="btn-main" onclick="submitAction('DEPOT')">Confirmer le Dépôt</button>
+        </div>
+    </div>
+
+    <div id="v-ret" class="view">
+        <div class="card">
+            <h3>Retrait e-Mola</h3>
+            <input type="number" id="in-ret-amt" placeholder="Montant à retirer">
+            <span id="fee-preview" class="fee-info"></span>
+            <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85)">
+            <button class="btn-main" onclick="submitAction('RETRAIT')">Demander le Retrait</button>
+        </div>
+    </div>
+
+    <div id="v-admin" class="view">
+        <h3>Gestion des demandes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Réf/Num</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="admin-list"></tbody>
+        </table>
+        <button onclick="showView('v-dash')" style="margin-top:20px">Quitter Admin</button>
+    </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
+    // 1. Initialisation des données
     let balance = 2500.00;
-    const FRAIS_RETRAIT = 0.10;
-
+    const FRAIS_RETRAIT = 0.10; // 10% de frais
     let transactions = [
         { id: 1, date: '27/03/2026', type: 'IA PROFIT', amt: 45.20, ref: 'AUTO', status: 'done' }
     ];
 
-    function showView(id) {
+    // 2. Navigation
+    window.showView = function(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+        const target = document.getElementById(id);
+        if (target) target.classList.add('active');
+    };
 
-    window.showView = showView;
+    window.accessAdmin = function() {
+        const code = prompt("Code Agent Admin :");
+        if (code === "2024") showView('v-admin');
+        else if (code !== null) alert("Accès refusé.");
+    };
 
-    // ✅ FIX EVENT LISTENER
-    const inputRet = document.getElementById('in-ret-amt');
-    if (inputRet) {
-        inputRet.addEventListener('input', function (e) {
-            const val = parseFloat(e.target.value);
+    // 3. Calcul des frais en temps réel
+    const inRetAmt = document.getElementById('in-ret-amt');
+    if (inRetAmt) {
+        inRetAmt.addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            const preview = document.getElementById('fee-preview');
             if (val > 0) {
                 const frais = val * FRAIS_RETRAIT;
                 const net = val - frais;
-                document.getElementById('fee-preview').innerText =
-                    `Frais: ${frais.toFixed(2)} MT | Vous recevrez: ${net.toFixed(2)} MT`;
+                preview.innerText = `Frais (10%): ${frais.toFixed(2)} MT | Vous recevrez: ${net.toFixed(2)} MT`;
             } else {
-                document.getElementById('fee-preview').innerText = "";
+                preview.innerText = "";
             }
         });
     }
 
-    function submitAction(type) {
-        const amtIn = (type === 'DEPOT') ? 'in-depo-amt' : 'in-ret-amt';
-        const refIn = (type === 'DEPOT') ? 'in-depo-ref' : 'in-ret-num';
+    // 4. Soumission d'une transaction
+    window.submitAction = function(type) {
+        const amtInput = (type === 'DEPOT') ? 'in-depo-amt' : 'in-ret-amt';
+        const refInput = (type === 'DEPOT') ? 'in-depo-ref' : 'in-ret-num';
 
-        const amt = parseFloat(document.getElementById(amtIn).value);
-        const ref = document.getElementById(refIn).value;
+        const amt = parseFloat(document.getElementById(amtInput).value);
+        const ref = document.getElementById(refInput).value.trim();
 
-        if (!amt || !ref) return alert("Veuillez remplir les champs.");
+        if (isNaN(amt) || amt <= 0 || ref === "") return alert("Champs invalides.");
 
-        if (type === 'RETRAIT') {
-            if (amt > balance) return alert("❌ Solde insuffisant !");
-            if (!confirm(`Confirmer ?\nNet: ${(amt * 0.9).toFixed(2)} MT`)) return;
-        }
+        if (type === 'RETRAIT' && amt > balance) return alert("Solde insuffisant.");
 
         transactions.unshift({
-            id: Date.now(),
-            date: new Date().toLocaleDateString(),
+            id: Date.now() + Math.random(),
+            date: new Date().toLocaleDateString('fr-FR'),
             type: type,
             amt: amt,
             ref: ref,
             status: 'wait'
         });
 
-        alert("Demande envoyée !");
+        alert("Demande envoyée ! En attente de validation agent.");
+        document.getElementById(amtInput).value = "";
+        document.getElementById(refInput).value = "";
         updateUI();
         showView('v-dash');
-    }
+    };
 
-    window.submitAction = submitAction;
-
-    function accessAdmin() {
-        if (prompt("Code Admin :") === "2024") showView('v-admin');
-    }
-
-    window.accessAdmin = accessAdmin;
-
-    function process(id, state) {
+    // 5. Validation Admin (Agent)
+    window.process = function(id, state) {
         const tx = transactions.find(t => t.id === id);
+        if (!tx) return;
 
         if (state === 'done') {
             tx.status = 'done';
@@ -76,18 +205,17 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             tx.status = 'fail';
         }
-
         updateUI();
-    }
+    };
 
-    window.process = process;
-
+    // 6. Mise à jour Interface
     function updateUI() {
-        document.getElementById('display-bal').innerText =
-            balance.toLocaleString('fr-FR', { minimumFractionDigits: 2 });
+        const balEl = document.getElementById('display-bal');
+        if (balEl) balEl.innerText = balance.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " MT";
 
-        document.getElementById('user-trans-list').innerHTML =
-            transactions.map(t => `
+        const userList = document.getElementById('user-trans-list');
+        if (userList) {
+            userList.innerHTML = transactions.map(t => `
                 <tr>
                     <td>${t.date}</td>
                     <td>${t.type}</td>
@@ -95,32 +223,40 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td><span class="status-badge s-${t.status}">${t.status}</span></td>
                 </tr>
             `).join('');
+        }
 
-        document.getElementById('admin-list').innerHTML =
-            transactions.filter(t => t.status === 'wait').map(t => `
+        const adminList = document.getElementById('admin-list');
+        if (adminList) {
+            const pending = transactions.filter(t => t.status === 'wait');
+            adminList.innerHTML = pending.length > 0 ? pending.map(t => `
                 <tr>
                     <td>${t.type}</td>
-                    <td><b>${t.amt} MT</b></td>
+                    <td>${t.amt} MT</td>
                     <td>${t.ref}</td>
                     <td>
-                        <button onclick="process(${t.id}, 'done')">OK</button>
-                        <button onclick="process(${t.id}, 'fail')">X</button>
+                        <button onclick="process(${t.id}, 'done')">✔️</button>
+                        <button onclick="process(${t.id}, 'fail')">❌</button>
                     </td>
                 </tr>
-            `).join('');
+            `).join('') : '<tr><td colspan="4">Aucune attente</td></tr>';
+        }
     }
 
-    // ✅ FIX CHART (sécurisé)
+    // 7. Graphique
     if (window.ApexCharts) {
         new ApexCharts(document.querySelector("#main-chart"), {
             series: [{ name: 'Balance', data: [2100, 2300, 2200, 2400, 2500] }],
-            chart: { height: 180, type: 'area', sparkline: { enabled: true } },
+            chart: { height: 120, type: 'area', sparkline: { enabled: true } },
             colors: ['#00ff85'],
-            stroke: { curve: 'smooth', width: 3 },
-            fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0 } }
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } }
         }).render();
     }
 
     updateUI();
 });
 </script>
+
+</body>
+        </html>
+    
