@@ -3,27 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguard - Neural e-Mola Interface</title>
+    <title>Vanguard - e-Mola Intelligence v3.0</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'v-bg': '#05070a',
+                        'v-card': 'rgba(22, 27, 40, 0.8)',
+                        'v-accent': '#00ff85',
+                        'v-danger': '#ff4d4d',
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #05070a; color: white; overflow-x: hidden; }
-        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; }
+        #splash { transition: opacity 0.8s ease, visibility 0.8s; }
+        .loader { border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid #00ff85; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-item::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 5px; background: #00ff85; border-radius: 50%; transition: width 0.3s; }
+        .nav-item.active::after { width: 5px; }
         .view { display: none; animation: fadeIn 0.4s ease-out; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* ALERTES ROUGES COMPTE VIDE */
-        @keyframes alertFlash {
-            0% { background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.3); }
-            50% { background: rgba(255, 77, 77, 0.2); border-color: #ff4d4d; box-shadow: 0 0 15px rgba(255, 77, 77, 0.4); }
-            100% { background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.3); }
-        }
-        .account-empty-alert { animation: alertFlash 1s infinite; border: 1px solid #ff4d4d !important; }
-        .text-danger-blink { color: #ff4d4d !important; animation: pulseText 0.6s infinite; }
-        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        
+        .status-badge { font-size: 0.5rem; padding: 1px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .s-done { color: #00ff85; background: rgba(0,255,133,0.1); }
+        .s-wait { color: #ffab00; background: rgba(255,171,0,0.1); }
+        .s-fail { color: #ff4d4d; background: rgba(255,77,77,0.1); }
         .pulse-up { animation: pulseGreen 1s; }
         .pulse-down { animation: pulseRed 1s; }
         @keyframes pulseGreen { 0% { color: #00ff85; } 100% { color: white; } }
@@ -32,289 +47,277 @@
 </head>
 <body>
 
-    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-[#00ff85] text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000] text-[10px] uppercase">Action confirmée</div>
+    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-v-accent text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000]">Action réussie !</div>
 
-    <div id="v-auth" class="fixed inset-0 bg-[#05070a] z-[5000] p-8 flex flex-col justify-center">
-        <div class="text-center mb-10">
-            <h2 class="text-4xl font-black text-[#00ff85] italic tracking-tighter">VANGUARD</h2>
-            <p class="text-gray-500 text-[10px] uppercase tracking-[0.4em] mt-1">Neural e-Mola Protocol</p>
-        </div>
-        <div class="space-y-4">
-            <input type="text" id="log-code" placeholder="CODE CLIENT (ex: L.NG)" class="w-full p-4 rounded-2xl bg-gray-900 border border-[#00ff85]/20 outline-none text-xl font-black text-[#00ff85] text-center uppercase">
-            <input type="password" id="log-pin" placeholder="PIN SECRET" class="w-full p-4 rounded-2xl bg-gray-900 border border-white/5 outline-none text-center text-white">
-            <button onclick="finalizeAuth()" class="w-full p-4 bg-white text-black font-black rounded-2xl active:scale-95 transition text-sm uppercase italic">Accéder au Terminal</button>
-        </div>
+    <div id="splash" class="fixed inset-0 bg-v-bg flex flex-col justify-center items-center z-[9999]">
+        <div class="loader w-12 h-12 rounded-full mb-6"></div>
+        <h2 class="text-3xl font-black tracking-tighter">VANGUARD</h2>
+        <p class="text-gray-500 mt-2 text-[10px] uppercase tracking-widest italic">Fusion e-Mola Intelligence</p>
     </div>
 
-    <div id="v-terms" class="fixed inset-0 bg-black/95 z-[6000] p-8 flex flex-col justify-center hidden">
-        <div class="glass-card p-6 rounded-3xl border border-[#00ff85]/50 max-w-[360px] mx-auto">
-            <h2 class="text-[#00ff85] font-black italic text-xl mb-6 text-center uppercase">Contrat Vanguard</h2>
-            <div class="space-y-4 text-[9px] text-gray-300 uppercase tracking-widest leading-relaxed">
-                <p class="flex items-start"><i class="fas fa-check text-[#00ff85] mt-0.5 mr-3"></i> <span>Dépôt Min 640 MT / 18 Ans / e-Mola Movitel actif.</span></p>
-                <p class="flex items-start"><i class="fas fa-lock text-[#00ff85] mt-0.5 mr-3"></i> <span>Capital de Garantie (640 MT) non-retirable.</span></p>
-                <p class="flex items-start"><i class="fas fa-unlock text-[#00ff85] mt-0.5 mr-3"></i> <span>Retrait activé dès 1 280 MT (Palier 20$).</span></p>
-                <p class="flex items-start"><i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3"></i> <span><b>Retrait Total (50$) :</b> Redépôt requis sous 24h ou amende 10$.</span></p>
-                <p class="flex items-start"><i class="fas fa-gift text-[#00ff85] mt-0.5 mr-3"></i> <span><b>Bonus Elite (80$) :</b> +640 MT offerts automatiquement.</span></p>
+    <div id="v-auth" class="fixed inset-0 bg-v-bg z-[5000] p-8 flex flex-col justify-center">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-black text-v-accent italic tracking-tighter">VANGUARD</h2>
+            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em]">Neural Trading Interface</p>
+        </div>
+
+        <div id="form-register" class="space-y-4">
+            <input type="text" id="reg-name" placeholder="Nom Complet" class="w-full p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
+            <div class="flex gap-2">
+                <input type="number" id="reg-tel" placeholder="Movitel (86/87)" class="flex-1 p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
+                <input type="number" id="reg-age" placeholder="Âge" class="w-20 p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
             </div>
-            <button onclick="acceptTerms()" class="w-full mt-8 py-4 bg-[#00ff85] text-black font-black rounded-2xl uppercase italic text-xs">Activer l'IA</button>
+            <div class="flex gap-2">
+                <input type="text" id="reg-code" placeholder="CODE CLIENT (ex: L.NG)" class="flex-1 p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-sm font-bold text-v-accent uppercase">
+                <input type="password" id="reg-pin" placeholder="PIN" class="w-24 p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-sm text-white text-center">
+            </div>
+            <button onclick="finalizeAuth('register')" class="w-full p-4 bg-v-accent text-black font-extrabold rounded-xl shadow-lg active:scale-95 transition text-sm">ACTIVER MON COMPTE</button>
+            <p class="text-center text-[10px] text-gray-500">Déjà membre ? <span onclick="toggleAuth('login')" class="text-v-accent cursor-pointer underline">Se connecter</span></p>
+        </div>
+
+        <div id="form-login" class="space-y-4 hidden text-center">
+            <input type="text" id="log-code" placeholder="VOTRE CODE (ex: L.NG)" class="w-full p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-xl font-black text-v-accent text-center uppercase">
+            <input type="password" id="log-pin" placeholder="VOTRE PIN SECRET" class="w-full p-4 rounded-xl bg-v-card border border-white/10 outline-none text-center text-white">
+            <button onclick="finalizeAuth('login')" class="w-full p-4 bg-white text-black font-extrabold rounded-xl active:scale-95 transition text-sm uppercase">Accéder au Terminal</button>
+            <p class="text-center text-[10px] text-gray-500">Nouveau ici ? <span onclick="toggleAuth('register')" class="text-v-accent cursor-pointer underline">Créer un compte</span></p>
         </div>
     </div>
 
     <div class="container max-w-[450px] mx-auto p-5 pb-24">
         
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-light">Compte <span class="font-bold text-[#00ff85]" id="user-display">--</span></h1>
-            <div id="ai-badge" class="text-[0.6rem] font-bold text-[#00ff85] bg-[#00ff85]/10 px-3 py-1 rounded-full border border-[#00ff85] animate-pulse uppercase">● IA Live</div>
+            <h1 class="text-xl font-light">Compte <span class="font-bold text-v-accent current-user-code">--</span></h1>
+            <div class="text-[0.6rem] font-bold text-v-accent bg-[rgba(0,255,133,0.1)] px-3 py-1 rounded-full border border-v-accent animate-pulse">● IA LIVE</div>
         </div>
 
         <div id="v-dash" class="view active">
-            <div id="penalty-box" class="hidden bg-red-500/20 border border-red-500/50 p-3 rounded-2xl mb-4 flex justify-between items-center animate-pulse">
-                <span class="text-[8px] font-bold text-red-500 uppercase tracking-tighter">REDÉPÔT OBLIGATOIRE (24H) :</span>
-                <span id="timer-val" class="font-mono text-xs font-black">23:59:59</span>
-            </div>
-
-            <div id="main-balance-card" class="glass-card p-6 rounded-3xl mb-6">
+            <div class="glass-card p-6 rounded-3xl mb-6">
                 <div class="flex justify-between items-start mb-2">
-                    <small class="text-gray-400 block uppercase tracking-widest text-[8px]">Solde Vanguard e-Mola</small>
-                    <div class="text-[9px] text-[#00ff85] font-mono italic" id="status-text">TRADING OPTIMAL</div>
+                    <small class="text-gray-400 block uppercase tracking-widest text-[8px]">Bonus Vanguard vs e-Mola (10$)</small>
+                    <div class="text-[9px] text-v-accent font-mono italic">Taux: <span id="current-rate">640.00</span> MT</div>
                 </div>
-                <div id="display-bal" class="text-4xl font-extrabold transition-all">0.00 <span class="text-[#00ff85] text-base ml-1">MT</span></div>
+                <div id="display-bal" class="text-4xl font-extrabold transition-all">0.00 <span class="text-v-accent text-base ml-1">MT</span></div>
                 <div id="main-chart" class="mt-4"></div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4 px-1">
+                <h2 class="text-sm font-bold uppercase tracking-tighter italic">Flux Trading Clients</h2>
+                <span onclick="accessAdmin()" class="text-gray-700 text-[9px] cursor-pointer hover:text-v-accent transition uppercase">Agent Portal</span>
             </div>
 
             <div class="glass-card p-4 rounded-2xl">
-                <table class="w-full text-[10px]">
-                    <tbody id="user-list" class="divide-y divide-white/5"></tbody>
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="text-left text-gray-500 uppercase text-[8px] tracking-widest border-b border-white/5">
+                            <th class="pb-3">Client</th>
+                            <th class="pb-3 text-center">Solde Live</th>
+                            <th class="pb-3 text-right">Mouvement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-trans-list" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="v-intel" class="view">
-            <h2 class="text-lg font-black mb-4 italic uppercase tracking-tighter text-[#00ff85]">Neural Matrix Stream</h2>
-            <div id="logs" class="glass-card p-4 rounded-2xl h-[420px] overflow-hidden font-mono text-[8px] text-gray-500 space-y-1"></div>
+            <h2 class="text-xl font-bold mb-5 italic">Neural Engine</h2>
+            <div class="glass-card p-5 rounded-2xl font-mono text-[9px] text-gray-500 h-80 overflow-y-auto space-y-2" id="logs">
+                <div class="text-v-accent">>> System boot sequence... OK</div>
+            </div>
+        </div>
+
+        <div id="v-depo" class="view">
+            <div class="glass-card p-6 rounded-3xl border border-v-accent/20">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-v-accent italic">RECHARGE</h2>
+                    <span id="depo-client-tag" class="bg-v-accent/10 text-v-accent text-[9px] px-2 py-1 rounded border border-v-accent/30 font-bold uppercase tracking-widest">--</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mb-6">Envoyez les fonds au <b>300032</b> via e-Mola, puis validez ci-dessous.</p>
+                <input type="number" id="in-depo-amt" placeholder="Montant MT" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-3 text-sm">
+                <textarea id="in-depo-sms" placeholder="Collez le SMS de confirmation ici..." class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-[9px] text-gray-300 outline-none h-24 mb-4"></textarea>
+                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl shadow-lg active:scale-95 transition" onclick="validateSmartDeposit()">ACTIVER LE DÉPÔT</button>
+            </div>
         </div>
 
         <div id="v-ret" class="view">
-            <div class="glass-card p-6 rounded-3xl border border-white/5">
-                <h2 class="text-xl font-bold mb-6 text-center uppercase italic">Retrait Flux</h2>
+            <div class="glass-card p-6 rounded-3xl">
+                <h2 class="text-xl font-bold mb-1 italic text-center">RETRAIT SÉCURISÉ</h2>
+                <p class="text-[9px] text-gray-500 text-center mb-6 uppercase tracking-widest font-bold">Session: <span class="current-user-code text-v-accent">--</span></p>
                 <div class="space-y-4">
-                    <input type="number" id="ret-amt" placeholder="Montant MT" class="w-full p-4 rounded-2xl bg-gray-900 border border-white/5 outline-none text-white">
-                    <input type="password" id="ret-pin" placeholder="PIN SECRET" class="w-full p-4 rounded-2xl bg-gray-900 border border-[#00ff85]/20 text-[#00ff85] text-center font-bold text-xl">
-                    <button onclick="executeRetrait()" class="w-full p-4 bg-white text-black font-black rounded-2xl uppercase italic text-sm">Valider Retrait</button>
+                    <input type="number" id="in-ret-amt" placeholder="Montant MT" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none text-sm">
+                    <input type="number" id="in-ret-num" placeholder="Numéro e-Mola (84/85...)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none text-sm">
+                    <div class="pt-4 border-t border-white/5">
+                        <label class="text-[8px] text-gray-500 uppercase ml-1">Confirmation PIN Secret</label>
+                        <input type="password" id="retrait-pin-confirm" placeholder="****" class="w-full p-4 rounded-xl bg-v-accent/5 border border-v-accent/20 text-v-accent outline-none text-center font-bold tracking-widest mt-1 text-xl">
+                    </div>
+                    <button class="w-full p-4 bg-white text-black font-extrabold rounded-xl active:scale-95 transition uppercase text-sm" onclick="submitAction('RETRAIT')">Valider le flux</button>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] glass-card rounded-full p-2 flex justify-around items-center z-[100] border border-white/10 shadow-2xl">
-        <div class="nav-item active text-[#00ff85] text-xl p-3 cursor-pointer" onclick="showView('v-dash', this)"><i class="fas fa-chart-pie"></i></div>
-        <div class="nav-item text-gray-500 text-xl p-3 cursor-pointer" onclick="showView('v-intel', this)"><i class="fas fa-microchip"></i></div>
-        <div class="nav-item text-gray-500 text-xl p-3 cursor-pointer" onclick="showView('v-ret', this)"><i class="fas fa-wallet"></i></div>
+    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] glass-card rounded-3xl p-3 flex justify-around items-center z-[100] border border-white/10 shadow-2xl">
+        <div class="nav-item active text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-dash', this)"><i class="fas fa-th-large"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-intel', this)"><i class="fas fa-brain"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-depo', this)"><i class="fas fa-qrcode"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-ret', this)"><i class="fas fa-arrow-down"></i></div>
     </div>
 
     <script>
+        const usdRate = 64.00;
+        const tenUsdInMt = 640.00;
         const clientCodes = ["I.C", "L.NG", "B.G", "M.YV", "IR.A", "V.Z", "X.K"];
-        const furtiveConfigs = {"V.Z": 1, "X.K": 2, "I.C": 0.5}; // Temps de redépôt en heures
-        let clients = {};
         let currentUser = null;
-        let charts = {};
+        let clients = JSON.parse(localStorage.getItem('v-clients')) || {};
 
-        // Initialisation des données
-        clientCodes.forEach(code => {
-            clients[code] = {
-                code, balance: 640 + (Math.random()*500), secret: "1234",
-                history: [640, 680, 660, 700], bonus80Reached: false
-            };
-        });
-
-        function finalizeAuth() {
-            const code = document.getElementById('log-code').value.toUpperCase();
-            const pin = document.getElementById('log-pin').value;
-            if(!clients[code] || clients[code].secret !== pin) return notify("Accès Refusé");
-            
-            currentUser = code;
-            document.getElementById('v-auth').classList.add('hidden');
-            document.getElementById('v-terms').classList.remove('hidden');
-            document.getElementById('user-display').innerText = currentUser;
-            updateUI();
-            startAI();
+        // Initialisation des 7 clients fictifs
+        if (Object.keys(clients).length === 0) {
+            clientCodes.forEach(code => {
+                clients[code] = {
+                    code: code,
+                    balance: Math.floor(Math.random() * 5000) + 1000,
+                    secret: "1234",
+                    transactions: [{ id: Date.now(), type: 'BONUS', amt: tenUsdInMt, status: 'done' }]
+                };
+            });
         }
 
-        function acceptTerms() {
-            document.getElementById('v-terms').classList.add('hidden');
-            notify("Algorithme Vanguard Activé");
-            initSparklines();
+        window.onload = () => {
+            setTimeout(() => { 
+                document.getElementById('splash').style.opacity = '0'; 
+                setTimeout(() => document.getElementById('splash').style.display = 'none', 800); 
+            }, 2000);
+            updateUI();
+            initChart();
+            startLiveTrading();
+        };
+
+        function toggleAuth(mode) {
+            document.getElementById('form-register').classList.toggle('hidden', mode === 'login');
+            document.getElementById('form-login').classList.toggle('hidden', mode === 'register');
+        }
+
+        function finalizeAuth(mode) {
+            const code = document.getElementById(mode === 'register' ? 'reg-code' : 'log-code').value.toUpperCase();
+            const pin = document.getElementById(mode === 'register' ? 'reg-pin' : 'log-pin').value;
+
+            if (mode === 'register') {
+                if(!code || !pin) return notify("Champs requis !");
+                clients[code] = { code, balance: tenUsdInMt, secret: pin, transactions: [{ id: Date.now(), type: 'BONUS', amt: tenUsdInMt, status: 'done' }] };
+            } else {
+                if(!clients[code] || clients[code].secret !== pin) return notify("Accès refusé !");
+            }
+
+            currentUser = code;
+            document.getElementById('v-auth').style.display = 'none';
+            document.querySelectorAll('.current-user-code').forEach(el => el.innerText = currentUser);
+            document.getElementById('depo-client-tag').innerText = "ID: " + currentUser;
+            updateUI();
         }
 
         function updateUI(activeCode = null, variation = 0) {
-            const user = clients[currentUser];
-            const balCard = document.getElementById('main-balance-card');
-            const balText = document.getElementById('display-bal');
-            
-            // Gestion Alerte Rouge Compte Vide
-            if(user.balance <= 0) {
-                balCard.classList.add('account-empty-alert');
-                balText.classList.add('text-danger-blink');
-                balText.innerHTML = `0.00 <span class="text-white text-xs ml-1">MT (VIDE)</span>`;
-                document.getElementById('status-text').innerText = "DÉPÔT CRITIQUE REQUIS";
-                document.getElementById('status-text').className = "text-red-500 animate-bounce text-[9px] font-black";
-            } else {
-                balCard.classList.remove('account-empty-alert');
-                balText.classList.remove('text-danger-blink');
-                balText.innerHTML = `${user.balance.toFixed(2)} <span class="text-[#00ff85] text-base ml-1">MT</span>`;
-                document.getElementById('status-text').innerText = "TRADING OPTIMAL";
-                document.getElementById('status-text').className = "text-[#00ff85] italic text-[9px]";
-            }
-
-            // Liste des clients
+            let total = 0;
             let html = "";
             clientCodes.forEach(code => {
                 const c = clients[code];
-                const isZero = c.balance <= 0;
+                total += c.balance;
+                const last = c.transactions[0] || {type: 'NA', amt: 0, status: 'done'};
+                const isChanging = code === activeCode;
+
                 html += `
-                    <tr class="${isZero ? 'bg-red-500/10 animate-pulse' : ''}">
-                        <td class="py-4 font-bold ${isZero ? 'text-red-500' : 'text-gray-300'}">${c.code}</td>
-                        <td class="py-4 text-center font-mono ${isZero ? 'text-red-500' : ''}">
-                            ${isZero ? 'RE-CYCLAGE' : c.balance.toFixed(2)}
+                    <tr class="transition-all duration-300 ${isChanging ? 'bg-v-accent/5' : ''}">
+                        <td class="py-4">
+                            <div class="font-bold ${isChanging ? 'text-v-accent' : 'text-white'}">${c.code}</div>
+                            <div class="text-[7px] text-gray-600 uppercase">Live link</div>
                         </td>
-                        <td class="py-4"><div id="spark-${code.replace('.','')}"></div></td>
-                        <td class="py-4 text-right text-[8px] font-bold ${variation > 0 ? 'text-[#00ff85]' : 'text-red-500'}">
-                            ${code === activeCode && !isZero ? (variation > 0 ? '+':'') + variation : ''}
+                        <td class="py-4 text-center">
+                            <div class="font-mono font-bold ${isChanging ? (variation > 0 ? 'pulse-up' : 'pulse-down') : 'text-white'}">
+                                ${c.balance.toFixed(2)}
+                            </div>
+                            <div class="text-[8px] text-gray-500">${(c.balance/usdRate).toFixed(2)} $</div>
+                        </td>
+                        <td class="py-4 text-right">
+                            <div class="text-[9px] font-bold ${variation > 0 ? 'text-v-accent' : 'text-red-500'}">${isChanging ? (variation > 0 ? '+':'') + variation : ''}</div>
+                            <span class="status-badge s-${last.status}">${last.type}</span>
                         </td>
                     </tr>
                 `;
             });
-            document.getElementById('user-list').innerHTML = html;
+
+            document.getElementById('display-bal').innerHTML = `${total.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-sm ml-1">MT</span>`;
+            document.getElementById('user-trans-list').innerHTML = html;
+            localStorage.setItem('v-clients', JSON.stringify(clients));
         }
 
-        function startAI() {
+        function startLiveTrading() {
             setInterval(() => {
-                const code = clientCodes[Math.floor(Math.random()*7)];
-                const c = clients[code];
-                const isLoss = Math.random() < 0.3;
-                const variation = parseFloat(((Math.random() * 8) * (isLoss ? -1 : 1)).toFixed(2));
-                
-                if(c.balance > 0) {
-                    c.balance += variation;
-                    c.history.push(c.balance);
-                    if(c.history.length > 10) c.history.shift();
-
-                    // Règle 80$ (5120 MT)
-                    if(c.balance >= 5120 && !c.bonus80Reached) {
-                        c.balance += 640;
-                        c.bonus80Reached = true;
-                        addLog(code, "BONUS ELITE 80$ CRÉDITÉ", "SUCCESS");
-                    }
-
-                    // Cycle Furtif 50$
-                    if(c.balance >= 3200 && furtiveConfigs[code]) {
-                        addLog(code, "PALIER 50$ ATTEINT", "RETRAIT TOTAL");
-                        c.balance = 0;
-                        setTimeout(() => {
-                            c.balance = 640;
-                            addLog(code, "RE-DÉPÔT IA 10$", "COMPTE ACTIF");
-                        }, furtiveConfigs[code] * 3600000);
-                    }
-                }
-
-                if(charts[code]) charts[code].updateSeries([{ data: c.history }]);
+                const code = clientCodes[Math.floor(Math.random() * clientCodes.length)];
+                const variation = parseFloat((Math.random() * 4 - 1).toFixed(2));
+                clients[code].balance += variation;
                 updateUI(code, variation);
-                updatePenaltyTimer();
-            }, 2000);
-
-            // Matrix Log
-            setInterval(() => {
-                addLog(clientCodes[Math.floor(Math.random()*7)], "ANALYZING_NODE", "0x"+Math.random().toString(16).slice(2,6).toUpperCase());
-            }, 800);
+            }, 3000);
         }
 
-        function executeRetrait() {
-            const amt = parseFloat(document.getElementById('ret-amt').value);
-            const pin = document.getElementById('ret-pin').value;
-            const user = clients[currentUser];
+        function submitAction(type) {
+            const amt = parseFloat(document.getElementById('in-ret-amt').value);
+            const pin = document.getElementById('retrait-pin-confirm').value;
 
-            if(user.balance < 1280) return notify("BLOQUÉ : Seuil 20$ (1280 MT) non atteint");
-            if(pin !== user.secret) return notify("PIN INCORRECT");
+            if(!amt || amt > clients[currentUser].balance) return notify("Solde insuffisant !");
+            if(pin !== clients[currentUser].secret) return notify("PIN INCORRECT !");
 
-            const isTotal = (amt >= user.balance);
-            if(isTotal && user.balance < 3200) return notify("RETRAIT TOTAL : Minimum 50$ (3200 MT)");
+            const isInstant = Math.random() > 0.3;
+            if(isInstant) clients[currentUser].balance -= amt;
 
-            if(isTotal) {
-                user.balance = 0;
-                user.mustRedepositBy = Date.now() + (24 * 60 * 60 * 1000);
-                notify("RETRAIT TOTAL EFFECTUÉ. REDÉPÔT SOUS 24H !");
-            } else {
-                if(user.balance - amt < 640) return notify("IMPOSSIBLE DE TOUCHER AU BONUS GARANTIE");
-                user.balance -= amt;
-                notify("FLUX TRANSMIS");
-            }
-
+            clients[currentUser].transactions.unshift({ id: Date.now(), type, amt, status: isInstant ? 'done' : 'wait' });
+            
+            document.getElementById('retrait-pin-confirm').value = '';
             updateUI();
-            showView('v-dash');
+            showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+            notify(isInstant ? "Retrait Instantané (IA OK)" : "Vérification Agent requise");
         }
 
-        function updatePenaltyTimer() {
-            const user = clients[currentUser];
-            const box = document.getElementById('penalty-box');
-            if(user.balance <= 0 && user.mustRedepositBy) {
-                box.classList.remove('hidden');
-                const diff = user.mustRedepositBy - Date.now();
-                if(diff <= 0) {
-                    document.getElementById('timer-val').innerText = "AMENDE REQUISE";
-                } else {
-                    const h = Math.floor(diff/3600000);
-                    const m = Math.floor((diff%3600000)/60000);
-                    const s = Math.floor((diff%60000)/1000);
-                    document.getElementById('timer-val').innerText = `${h}h ${m}m ${s}s`;
-                }
+        function validateSmartDeposit() {
+            const amt = parseFloat(document.getElementById('in-depo-amt').value);
+            const sms = document.getElementById('in-depo-sms').value;
+            if(sms.includes("300032") && sms.includes(amt.toString())) {
+                clients[currentUser].transactions.unshift({ id: Date.now(), type: 'DEPOT', amt, status: 'wait' });
+                updateUI();
+                showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+                notify("SMS Validé par l'IA.");
             } else {
-                box.classList.add('hidden');
+                notify("Données non concordantes !");
             }
-        }
-
-        function addLog(code, action, status) {
-            const l = document.getElementById('logs');
-            const div = document.createElement('div');
-            div.className = "flex justify-between border-b border-white/5 py-1 animate-pulse";
-            div.innerHTML = `<span class="text-[#00ff85]">[${code}]</span> <span>${action}</span> <span class="text-white">${status}</span>`;
-            l.prepend(div);
-            if(l.children.length > 25) l.lastChild.remove();
-        }
-
-        function initSparklines() {
-            clientCodes.forEach(code => {
-                const id = "#spark-" + code.replace('.','');
-                charts[code] = new ApexCharts(document.querySelector(id), {
-                    series: [{ data: clients[code].history }],
-                    chart: { type: 'area', height: 20, width: 60, sparkline: { enabled: true } },
-                    colors: ['#00ff85'], stroke: { curve: 'smooth', width: 1 }, fill: { opacity: 0.1 }
-                });
-                charts[code].render();
-            });
         }
 
         function showView(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if(el) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-[#00ff85]'));
-                el.classList.add('active', 'text-[#00ff85]');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-v-accent'));
+                el.classList.add('active', 'text-v-accent');
             }
         }
 
-        function notify(msg) {
+        function notify(text) {
             const t = document.getElementById('toast');
-            t.innerText = msg; t.style.top = '20px';
+            t.innerText = text; t.style.top = '20px';
             setTimeout(() => t.style.top = '-64px', 3000);
         }
 
-        new ApexCharts(document.querySelector("#main-chart"), {
-            series: [{ name: 'IA', data: [30, 45, 40, 60, 55, 80, 75] }],
-            chart: { height: 100, type: 'area', sparkline: { enabled: true } },
-            colors: ['#00ff85'], stroke: { curve: 'smooth', width: 2 }
-        }).render();
+        function initChart() {
+            new ApexCharts(document.querySelector("#main-chart"), {
+                series: [{ name: 'Profit', data: [10, 25, 20, 30, 25, 40] }],
+                chart: { height: 100, type: 'area', sparkline: { enabled: true } },
+                colors: ['#00ff85'],
+                stroke: { curve: 'smooth', width: 2 },
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } }
+            }).render();
+        }
     </script>
 </body>
-                </html>
+</html>
+
+
+
     
