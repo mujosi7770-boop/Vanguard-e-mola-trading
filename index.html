@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguard - e-Mola Intelligence</title>
+    <title>Vanguard - e-Mola Intelligence v2.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -49,7 +49,7 @@
     <div id="splash" class="fixed inset-0 bg-v-bg flex flex-col justify-center items-center z-[9999]">
         <div class="loader w-12 h-12 rounded-full mb-6"></div>
         <h2 class="text-3xl font-extrabold tracking-widest">VANGUARD</h2>
-        <p class="text-gray-500 mt-2 text-sm italic">Fusion e-Mola Intelligence v2.0</p>
+        <p class="text-gray-500 mt-2 text-sm italic">Fusion e-Mola Intelligence</p>
     </div>
 
     <div class="container max-w-[450px] mx-auto p-5 pb-24">
@@ -61,18 +61,30 @@
 
         <div id="v-dash" class="view active">
             <div class="glass-card p-6 rounded-3xl mb-6">
-                <small class="text-gray-400">Solde Virtuel e-Mola</small>
-                <div id="display-bal" class="text-4xl font-extrabold mt-2 transition-all">0.00 <span class="text-v-accent text-base ml-1">MT</span></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <small class="text-gray-400 block mb-1 uppercase tracking-widest text-[9px]">Bonus Vanguard vs e-Mola</small>
+                        <div class="text-[10px] text-v-accent font-mono mb-2 italic">Taux: 10$ = <span id="current-rate">640.00</span> MT</div>
+                    </div>
+                </div>
+                <div id="display-bal" class="text-4xl font-extrabold mt-1 transition-all">0.00 <span class="text-v-accent text-base ml-1">MT</span></div>
                 <div id="main-chart" class="mt-4"></div>
             </div>
             
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">Flux de Transactions</h2>
-                <span onclick="accessAdmin()" class="text-gray-600 text-[10px] cursor-pointer hover:text-v-accent transition">PORTAL AGENT</span>
+                <h2 class="text-lg font-bold italic">Flux Clients</h2>
+                <span onclick="accessAdmin()" class="text-gray-600 text-[10px] cursor-pointer hover:text-v-accent transition uppercase tracking-tighter">Accès Agent</span>
             </div>
+
             <div class="glass-card p-4 rounded-2xl overflow-hidden">
                 <table class="w-full text-xs">
-                    <thead><tr class="text-left text-gray-500 uppercase pb-2"><th class="pb-2">Type</th><th class="pb-2">Montant</th><th class="pb-2 text-right">Statut</th></tr></thead>
+                    <thead>
+                        <tr class="text-left text-gray-500 uppercase pb-2">
+                            <th class="pb-2 font-light">Client</th>
+                            <th class="pb-2 font-light text-center">Solde (MT/$)</th>
+                            <th class="pb-2 text-right font-light">Activité</th>
+                        </tr>
+                    </thead>
                     <tbody id="user-trans-list" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
@@ -84,7 +96,7 @@
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-v-accent/10 rounded-full flex justify-center items-center text-v-accent text-xl"><i class="fas fa-microchip"></i></div>
                     <div>
-                        <h3 class="font-bold">Algorithme Vanguard</h3>
+                        <h3 class="font-bold text-sm">Algorithme Vanguard</h3>
                         <p class="text-[10px] text-gray-400">Scan constant du marché EUR/USD</p>
                     </div>
                 </div>
@@ -96,36 +108,35 @@
 
         <div id="v-depo" class="view">
             <div class="glass-card p-6 rounded-3xl border border-v-accent/20">
-                <h2 class="text-xl font-bold mb-2 text-v-accent">Dépôt Automatisé</h2>
-                <p class="text-[11px] text-gray-400 mb-4">Envoyez les fonds au <b>84 300 032</b> via e-Mola, puis collez le SMS de confirmation ci-dessous.</p>
+                <h2 class="text-xl font-bold mb-2 text-v-accent italic uppercase text-center">Dépôt IA</h2>
+                <p class="text-[11px] text-gray-400 mb-4 text-center">Envoyez au <b>84 300 032</b> via e-Mola.</p>
                 
                 <div class="bg-black/40 p-4 rounded-xl text-center border-2 border-dashed border-v-accent/40 mb-5">
                     <span class="text-gray-500 text-[10px] block uppercase">Agent Récepteur</span>
                     <span class="text-white text-2xl font-bold tracking-widest">300032</span>
                 </div>
 
-                <input type="number" id="in-depo-amt" placeholder="Montant exact (ex: 500)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-3">
-                
-                <textarea id="in-depo-sms" placeholder="Collez le SMS e-Mola ici..." class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-[10px] text-gray-300 outline-none h-24 mb-4"></textarea>
+                <input type="number" id="in-depo-amt" placeholder="Montant MT" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-3 text-sm">
+                <textarea id="in-depo-sms" placeholder="Collez le SMS de confirmation e-Mola..." class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-[10px] text-gray-300 outline-none h-24 mb-4"></textarea>
 
-                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl shadow-lg shadow-v-accent/20 active:scale-95 transition" onclick="validateSmartDeposit()">VÉRIFIER LE PAIEMENT</button>
+                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl shadow-lg active:scale-95 transition" onclick="validateSmartDeposit()">SOUMETTRE À L'IA</button>
             </div>
         </div>
 
         <div id="v-ret" class="view">
             <div class="glass-card p-6 rounded-3xl">
-                <h2 class="text-xl font-bold mb-5 italic">Retrait Direct</h2>
-                <input type="number" id="in-ret-amt" placeholder="Montant à retirer" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-4">
-                <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85XXXXXXX)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-6">
-                <button class="w-full p-4 bg-white text-black font-bold rounded-xl active:scale-95 transition" onclick="submitAction('RETRAIT')">CONFIRMER LE RETRAIT</button>
+                <h2 class="text-xl font-bold mb-5 italic text-center uppercase">Retrait Sécurisé</h2>
+                <input type="number" id="in-ret-amt" placeholder="Montant à retirer (MT)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-4 text-sm">
+                <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85...)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-6 text-sm">
+                <button class="w-full p-4 bg-white text-black font-bold rounded-xl active:scale-95 transition" onclick="submitAction('RETRAIT')">IDENTIFIER ET RETIRER</button>
             </div>
         </div>
 
         <div id="v-admin" class="view">
             <div class="glass-card p-6 rounded-3xl border border-yellow-500/30">
-                <h2 class="text-xl font-bold mb-5 text-yellow-500">Validation Agent</h2>
+                <h2 class="text-xl font-bold mb-5 text-yellow-500 italic uppercase">Validation Agent</h2>
                 <div id="admin-list" class="space-y-3"></div>
-                <button class="w-full p-3 bg-gray-800 rounded-xl mt-6 text-xs" onclick="showView('v-dash')">QUITTER LE MODE AGENT</button>
+                <button class="w-full p-3 bg-gray-800 rounded-xl mt-6 text-xs" onclick="showView('v-dash')">QUITTER MODE AGENT</button>
             </div>
         </div>
 
@@ -139,11 +150,27 @@
     </div>
 
     <script>
-        // --- LOGIQUE CORE & PERSISTANCE ---
-        let balance = parseFloat(localStorage.getItem('v-bal')) || 2500.00;
-        let transactions = JSON.parse(localStorage.getItem('v-tx')) || [
-            { id: 1, date: 'Initial', type: 'WELCOME BONUS', amt: 2500.00, status: 'done' }
-        ];
+        // --- CONFIGURATION CLIENTS & TAUX ---
+        const usdRate = 64.00;
+        const tenUsdInMt = 10 * usdRate;
+        const clientCodes = ["I.C", "L.NG", "B.G", "M.YV", "IR.A", "V.Z", "X.K"];
+        
+        let clients = JSON.parse(localStorage.getItem('v-clients')) || {};
+
+        // Initialisation si vide
+        if (Object.keys(clients).length === 0) {
+            clientCodes.forEach(code => {
+                let initialBal = Math.floor(Math.random() * 3000) + 1000;
+                clients[code] = {
+                    code: code,
+                    balance: initialBal,
+                    secret: "1234", 
+                    transactions: [
+                        { id: Date.now(), type: 'Vanguard vs e-Mola Bonus', amt: tenUsdInMt, status: 'done', date: 'Initial' }
+                    ]
+                };
+            });
+        }
 
         let chart;
 
@@ -156,49 +183,88 @@
         };
 
         function updateUI() {
-            document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-sm ml-1">MT</span>`;
-            localStorage.setItem('v-bal', balance);
-            localStorage.setItem('v-tx', JSON.stringify(transactions));
+            let totalSystemBalance = 0;
+            let htmlContent = "";
+            document.getElementById('current-rate').innerText = tenUsdInMt.toFixed(2);
 
-            document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
-                <tr class="border-b border-white/5">
-                    <td class="py-4 font-bold text-[10px]">${t.type}</td>
-                    <td class="py-4 text-white font-mono">${t.amt.toFixed(2)}</td>
-                    <td class="py-4 text-right"><span class="status-badge s-${t.status}">${t.status}</span></td>
-                </tr>
-            `).join('');
+            clientCodes.forEach(code => {
+                const c = clients[code];
+                totalSystemBalance += c.balance;
+                const lastTx = c.transactions[0] || { type: 'N/A', amt: 0, status: 'done' };
+                const txColor = lastTx.type === 'RETRAIT' ? 'text-red-400' : 'text-v-accent';
+                const symbol = lastTx.type === 'RETRAIT' ? '-' : '+';
+
+                htmlContent += `
+                    <tr class="border-b border-white/5">
+                        <td class="py-4">
+                            <div class="font-bold text-white">${c.code}</div>
+                            <div class="text-[7px] text-gray-500 uppercase tracking-tighter">Verified IA</div>
+                        </td>
+                        <td class="py-4 text-center">
+                            <div class="font-mono text-v-accent font-bold">${c.balance.toFixed(0)} MT</div>
+                            <div class="text-[8px] text-gray-500">${(c.balance/usdRate).toFixed(2)} $</div>
+                        </td>
+                        <td class="py-4 text-right">
+                            <div class="text-[10px] ${txColor} font-bold">${symbol}${lastTx.amt.toFixed(0)}</div>
+                            <span class="status-badge s-${lastTx.status}" style="font-size:6px">${lastTx.status}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('display-bal').innerHTML = `${totalSystemBalance.toLocaleString('fr-FR', {minimumFractionDigits:0})} <span class="text-v-accent text-base ml-1">MT</span>`;
+            document.getElementById('user-trans-list').innerHTML = htmlContent;
+            localStorage.setItem('v-clients', JSON.stringify(clients));
         }
 
-        // --- SCANNER SMS INTELLIGENT ---
+        // --- RETRAIT AVEC LOGIQUE SÉCURISÉE & AUTOMATIQUE ---
+        function submitAction(type) {
+            const clientCode = prompt("ENTREZ LE NOM DE CODE DU CLIENT (ex: I.C) :").toUpperCase();
+            if (!clients[clientCode]) return notify("ERREUR : Client introuvable !");
+            
+            const secret = prompt(`VALIDATION IA POUR ${clientCode} : Code Secret ?`);
+            if (secret !== clients[clientCode].secret) return notify("ACCÈS REFUSÉ : Fraude détectée !");
+
+            const amt = parseFloat(document.getElementById('in-ret-amt').value);
+            if(!amt || amt > clients[clientCode].balance) return notify("SOLDE INSUFFISANT !");
+            
+            // Logique de fluidité : 70% chance que ça passe direct en DONE
+            const isInstant = Math.random() > 0.3;
+            const finalStatus = isInstant ? 'done' : 'wait';
+
+            if(isInstant) clients[clientCode].balance -= amt;
+
+            clients[clientCode].transactions.unshift({ 
+                id: Date.now(), 
+                type: 'RETRAIT', 
+                amt: amt, 
+                status: finalStatus 
+            });
+
+            updateUI();
+            showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+            notify(isInstant ? "Retrait Instantané (IA OK)" : "Vérification Agent requise.");
+            document.getElementById('in-ret-amt').value = '';
+        }
+
         function validateSmartDeposit() {
             const amt = parseFloat(document.getElementById('in-depo-amt').value);
             const smsText = document.getElementById('in-depo-sms').value;
-            const btn = event.target;
+            const targetCode = prompt("ATTRIBUER À QUEL CODE CLIENT ?").toUpperCase();
 
-            if(!amt || smsText.length < 10) return notify("Veuillez remplir tous les champs !");
-
-            btn.innerText = "Analyse IA en cours...";
+            if(!clients[targetCode]) return notify("Client inconnu !");
             
-            setTimeout(() => {
-                // Simulation d'IA qui cherche le numéro agent et le montant dans le texte
-                const hasAgent = smsText.includes("300032");
-                const hasAmount = smsText.includes(amt.toString());
-
-                if(hasAgent && hasAmount) {
-                    transactions.unshift({ id: Date.now(), date: 'Now', type: 'DEPOT E-MOLA', amt: amt, status: 'wait' });
-                    updateUI();
-                    showView('v-dash', document.querySelectorAll('.nav-item')[0]);
-                    notify("SMS Validé ! En attente de l'agent.");
-                    document.getElementById('in-depo-amt').value = '';
-                    document.getElementById('in-depo-sms').value = '';
-                } else {
-                    notify("Données SMS non concordantes !");
-                }
-                btn.innerText = "VÉRIFIER LE PAIEMENT";
-            }, 2000);
+            if(smsText.includes("300032") && smsText.includes(amt.toString())) {
+                clients[targetCode].transactions.unshift({ id: Date.now(), type: 'DEPOT', amt: amt, status: 'wait' });
+                updateUI();
+                showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+                notify("SMS Validé. En attente agent.");
+            } else {
+                notify("Données SMS non valides !");
+            }
         }
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & ADMIN ---
         function showView(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -214,86 +280,62 @@
             setTimeout(() => t.style.top = '-64px', 3000);
         }
 
-        // --- ADMIN PORTAL ---
         function accessAdmin() {
-            if(prompt("Code Agent (300032):") === "2024") {
+            if(prompt("Code Agent :") === "2024") {
                 showView('v-admin');
                 renderAdmin();
             }
         }
 
         function renderAdmin() {
-            const pending = transactions.filter(t => t.status === 'wait');
-            document.getElementById('admin-list').innerHTML = pending.length ? pending.map(t => `
-                <div class="p-4 bg-white/5 rounded-xl flex justify-between items-center">
-                    <div><div class="text-[10px] text-gray-400">${t.type}</div><div class="font-bold">${t.amt} MT</div></div>
-                    <div class="flex gap-2">
-                        <button onclick="processTx(${t.id}, 'done')" class="p-2 bg-v-accent text-black rounded-lg"><i class="fas fa-check"></i></button>
-                        <button onclick="processTx(${t.id}, 'fail')" class="p-2 bg-red-500 text-white rounded-lg"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-            `).join('') : '<div class="text-center text-gray-500 text-xs py-10 text-italic">Aucune transaction à valider</div>';
+            let html = "";
+            Object.values(clients).forEach(c => {
+                const pending = c.transactions.filter(t => t.status === 'wait');
+                pending.forEach(t => {
+                    html += `
+                        <div class="p-4 bg-white/5 rounded-xl flex justify-between items-center mb-2">
+                            <div>
+                                <div class="text-[10px] text-v-accent font-bold">${c.code} (${t.type})</div>
+                                <div class="font-bold">${t.amt} MT</div>
+                            </div>
+                            <button onclick="processTx('${c.code}', ${t.id})" class="p-2 bg-v-accent text-black rounded-lg"><i class="fas fa-check"></i></button>
+                        </div>
+                    `;
+                });
+            });
+            document.getElementById('admin-list').innerHTML = html || '<div class="text-center text-gray-500 py-10 italic">Aucun flux en attente</div>';
         }
 
-        function processTx(id, state) {
-            const tx = transactions.find(t => t.id === id);
-            if(state === 'done') {
-                balance = (tx.type === 'RETRAIT') ? balance - tx.amt : balance + tx.amt;
-                tx.status = 'done';
-            } else {
-                tx.status = 'fail';
-            }
-            updateUI();
-            renderAdmin();
-            notify("Statut mis à jour !");
+        function processTx(code, id) {
+            const tx = clients[code].transactions.find(t => t.id === id);
+            if(tx.type === 'RETRAIT') clients[code].balance -= tx.amt;
+            else clients[code].balance += tx.amt;
+            tx.status = 'done';
+            updateUI(); renderAdmin(); notify("Validé !");
         }
 
-        function submitAction(type) {
-            const amt = parseFloat(document.getElementById('in-ret-amt').value);
-            if(!amt || amt > balance) return notify("Erreur de montant !");
-            
-            transactions.unshift({ id: Date.now(), date: 'Now', type: type, amt: amt, status: 'wait' });
-            updateUI();
-            showView('v-dash', document.querySelectorAll('.nav-item')[0]);
-            notify("Demande de retrait envoyée.");
-        }
-
-        // --- GRAPH & LOGS ---
         function initChart() {
             chart = new ApexCharts(document.querySelector("#main-chart"), {
-                series: [{ name: 'Profit', data: [10, 15, 13, 20, 18, 25, 22] }],
-                chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { speed: 400 } },
+                series: [{ name: 'Profit', data: [15, 25, 20, 35, 30, 45, 40] }],
+                chart: { height: 120, type: 'area', sparkline: { enabled: true } },
                 colors: ['#00ff85'],
                 stroke: { curve: 'smooth', width: 2 },
-                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } }
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } }
             });
             chart.render();
-            
-            // Simuler des updates de profit IA
-            setInterval(() => {
-                let newData = [...chart.w.globals.series[0]];
-                newData.push(Math.floor(Math.random() * (30 - 10) + 10));
-                if(newData.length > 10) newData.shift();
-                chart.updateSeries([{ data: newData }]);
-                
-                // Petit profit automatique 
-                if(Math.random() > 0.8) {
-                    let p = 0.5; balance += p; updateUI();
-                }
-            }, 5000);
         }
 
         function startLiveIntel() {
             const l = document.getElementById('logs');
-            const msgs = [">> Analyzing Volatility...", ">> e-Mola Gateway Secure", ">> Signal: BUY EUR/USD", ">> Neural weights adjusted"];
+            const msgs = [">> Analyzing Volatility...", ">> Client Sync OK", ">> Vanguard AI: Trade Executed", ">> Encrypting Flux..."];
             setInterval(() => {
                 const d = document.createElement('div');
                 d.innerText = msgs[Math.floor(Math.random()*msgs.length)];
                 l.prepend(d);
                 if(l.children.length > 20) l.lastChild.remove();
-            }, 3000);
+            }, 4000);
         }
     </script>
 </body>
-                                                                     </html>
-                    
+                    </html>
+    
