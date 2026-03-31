@@ -26,156 +26,177 @@
     </script>
     
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #05070a; color: white; overflow-x: hidden; }
-        
-        /* Splash Screen */
+        body { font-family: 'Inter', sans-serif; background-color: #05070a; color: white; overflow-x: hidden; }
         #splash { transition: opacity 0.8s ease, visibility 0.8s; }
         .loader { border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid #00ff85; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Glassmorphism */
-        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
-        
-        /* Navigation animée */
+        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .nav-item::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 5px; background: #00ff85; border-radius: 50%; transition: width 0.3s; }
         .nav-item.active::after { width: 5px; }
-        
-        /* Vue active */
         .view { display: none; animation: fadeIn 0.4s ease-out; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Status Badges */
-        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase; }
+        .status-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         .s-done { color: #00ff85; background: rgba(0,255,133,0.1); }
         .s-wait { color: #ffab00; background: rgba(255,171,0,0.1); }
-        
-        /* Input focus */
-        input:focus { border-color: #00ff85; box-shadow: 0 0 0 2px rgba(0, 255, 133, 0.2); }
+        .s-fail { color: #ff4d4d; background: rgba(255,77,77,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-v-accent text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000]">Transaction réussie !</div>
+    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-v-accent text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000]">Action réussie !</div>
 
     <div id="splash" class="fixed inset-0 bg-v-bg flex flex-col justify-center items-center z-[9999]">
         <div class="loader w-12 h-12 rounded-full mb-6"></div>
-        <h2 class="text-3xl font-extrabold tracking-widest text-white">VANGUARD</h2>
-        <p class="text-gray-500 mt-2 text-sm">Initialisation de l'IA Trading...</p>
+        <h2 class="text-3xl font-extrabold tracking-widest">VANGUARD</h2>
+        <p class="text-gray-500 mt-2 text-sm italic">Fusion e-Mola Intelligence v2.0</p>
     </div>
 
     <div class="container max-w-[450px] mx-auto p-5 pb-24">
         
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-light">Bonjour, <span class="font-bold">Trader</span></h1>
-            <div class="text-[0.7rem] font-bold text-v-accent bg-[rgba(0,255,133,0.1)] px-3 py-1 rounded-full border border-v-accent animate-pulse">● LIVE MARKET</div>
+            <h1 class="text-xl font-light">Compte <span class="font-bold text-v-accent">#300032</span></h1>
+            <div class="text-[0.7rem] font-bold text-v-accent bg-[rgba(0,255,133,0.1)] px-3 py-1 rounded-full border border-v-accent animate-pulse">● IA ACTIVE</div>
         </div>
 
         <div id="v-dash" class="view active">
             <div class="glass-card p-6 rounded-3xl mb-6">
-                <small class="text-gray-400">Solde Total e-Mola</small>
-                <div id="display-bal" class="text-4xl font-extrabold text-white mt-2 transition-colors duration-500">2 500,00 <span class="text-v-accent text-base font-medium ml-1">MT</span></div>
+                <small class="text-gray-400">Solde Virtuel e-Mola</small>
+                <div id="display-bal" class="text-4xl font-extrabold mt-2 transition-all">0.00 <span class="text-v-accent text-base ml-1">MT</span></div>
                 <div id="main-chart" class="mt-4"></div>
             </div>
             
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">Activités Récentes</h2>
-                <span onclick="accessAdmin()" class="text-v-accent text-xs cursor-pointer hover:underline">AGENT PORTAL</span>
+                <h2 class="text-lg font-bold">Flux de Transactions</h2>
+                <span onclick="accessAdmin()" class="text-gray-600 text-[10px] cursor-pointer hover:text-v-accent transition">PORTAL AGENT</span>
             </div>
-            <div class="glass-card p-5 rounded-2xl">
-                <table class="w-full text-sm">
-                    <thead><tr class="text-left text-gray-500 text-xs uppercase"><th>Type</th><th>Montant</th><th>Statut</th></tr></thead>
-                    <tbody id="user-trans-list" class="divide-y divide-[rgba(255,255,255,0.05)]"></tbody>
+            <div class="glass-card p-4 rounded-2xl overflow-hidden">
+                <table class="w-full text-xs">
+                    <thead><tr class="text-left text-gray-500 uppercase pb-2"><th class="pb-2">Type</th><th class="pb-2">Montant</th><th class="pb-2 text-right">Statut</th></tr></thead>
+                    <tbody id="user-trans-list" class="divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="v-intel" class="view">
-            <h2 class="text-xl font-bold mb-5">Intelligence Artificielle</h2>
-            <div class="glass-card p-6 rounded-2xl mb-5">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-12 h-12 bg-[rgba(0,255,133,0.1)] rounded-full flex justify-center items-center text-v-accent text-2xl"><i class="fas fa-brain"></i></div>
+            <h2 class="text-xl font-bold mb-5 italic">Neural Engine</h2>
+            <div class="glass-card p-6 rounded-2xl mb-5 border-l-4 border-v-accent">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-v-accent/10 rounded-full flex justify-center items-center text-v-accent text-xl"><i class="fas fa-microchip"></i></div>
                     <div>
-                        <h3 class="font-bold text-lg">Moteur d'IA : Vanguard v1.2</h3>
-                        <p class="text-sm text-gray-400">Statut : <span class="text-v-accent font-bold">OPÉRATIONNEL</span></p>
+                        <h3 class="font-bold">Algorithme Vanguard</h3>
+                        <p class="text-[10px] text-gray-400">Scan constant du marché EUR/USD</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 text-center mt-6">
-                    <div class="bg-[rgba(0,0,0,0.3)] p-4 rounded-xl border border-[rgba(255,255,255,0.03)]"><div class="text-xs text-gray-500">Calculs/sec</div><div class="text-2xl font-bold text-v-accent">150k</div></div>
-                    <div class="bg-[rgba(0,0,0,0.3)] p-4 rounded-xl border border-[rgba(255,255,255,0.03)]"><div class="text-xs text-gray-500">Précision</div><div class="text-2xl font-bold">98.5%</div></div>
-                </div>
             </div>
-            <h3 class="text-lg font-bold mb-4">Analyse en temps réel</h3>
-            <div class="glass-card p-5 rounded-2xl">
-                <div id="logs" class="text-xs font-mono text-gray-500 h-40 overflow-y-auto space-y-2">
-                    <div class="text-v-accent">[INITIALISATION] Système Vanguard actif...</div>
-                    <div>[MARCHÉ] Scan des paires terminé.</div>
-                    <div class="text-gray-400">[IA] Analyse des tendances sur 15min.</div>
-                </div>
+            <div class="glass-card p-5 rounded-2xl font-mono text-[10px] text-gray-500 h-64 overflow-y-auto space-y-2" id="logs">
+                <div class="text-v-accent">>> System boot sequence... OK</div>
             </div>
         </div>
 
         <div id="v-depo" class="view">
-            <div class="glass-card p-6 rounded-3xl">
-                <h2 class="text-xl font-bold mb-3">Dépôt Instantané</h2>
-                <p class="text-sm text-gray-400 mb-5">Envoyez le montant vers notre compte agent e-Mola :</p>
-                <div class="bg-[rgba(0,0,0,0.2)] p-4 rounded-xl text-center border-2 border-dashed border-v-accent mb-5">
-                    <span class="text-v-accent text-2xl font-bold tracking-wider">84 300 032</span>
+            <div class="glass-card p-6 rounded-3xl border border-v-accent/20">
+                <h2 class="text-xl font-bold mb-2 text-v-accent">Dépôt Automatisé</h2>
+                <p class="text-[11px] text-gray-400 mb-4">Envoyez les fonds au <b>84 300 032</b> via e-Mola, puis collez le SMS de confirmation ci-dessous.</p>
+                
+                <div class="bg-black/40 p-4 rounded-xl text-center border-2 border-dashed border-v-accent/40 mb-5">
+                    <span class="text-gray-500 text-[10px] block uppercase">Agent Récepteur</span>
+                    <span class="text-white text-2xl font-bold tracking-widest">300032</span>
                 </div>
-                <input type="number" id="in-depo-amt" placeholder="Montant (MT)" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-3">
-                <input type="text" id="in-depo-ref" placeholder="ID de transaction e-Mola" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-5">
-                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl text-lg hover:scale-[0.98] transition duration-300" onclick="submitAction('DEPOT')">VÉRIFIER LE DÉPÔT</button>
+
+                <input type="number" id="in-depo-amt" placeholder="Montant exact (ex: 500)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-3">
+                
+                <textarea id="in-depo-sms" placeholder="Collez le SMS e-Mola ici..." class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-[10px] text-gray-300 outline-none h-24 mb-4"></textarea>
+
+                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl shadow-lg shadow-v-accent/20 active:scale-95 transition" onclick="validateSmartDeposit()">VÉRIFIER LE PAIEMENT</button>
             </div>
         </div>
 
         <div id="v-ret" class="view">
             <div class="glass-card p-6 rounded-3xl">
-                <h2 class="text-xl font-bold mb-5">Retrait Fonds</h2>
-                <input type="number" id="in-ret-amt" placeholder="Montant à retirer" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300">
-                <div id="fee-preview" class="text-xs text-gray-500 mt-1 mb-4 ml-1">Frais: 0.00 MT | Net: 0.00 MT</div>
-                <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85)" class="w-full p-4 rounded-xl bg-[rgba(0,0,0,0.3)] border border-[rgba(255,255,255,0.05)] text-white outline-none transition duration-300 mb-5">
-                <button class="w-full p-4 bg-white text-black font-bold rounded-xl text-lg hover:scale-[0.98] transition duration-300" onclick="submitAction('RETRAIT')">DEMANDER LE RETRAIT</button>
+                <h2 class="text-xl font-bold mb-5 italic">Retrait Direct</h2>
+                <input type="number" id="in-ret-amt" placeholder="Montant à retirer" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-4">
+                <input type="text" id="in-ret-num" placeholder="Numéro e-Mola (84/85XXXXXXX)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-6">
+                <button class="w-full p-4 bg-white text-black font-bold rounded-xl active:scale-95 transition" onclick="submitAction('RETRAIT')">CONFIRMER LE RETRAIT</button>
             </div>
         </div>
 
         <div id="v-admin" class="view">
-            <div class="glass-card p-6 rounded-3xl">
-                <h2 class="text-xl font-bold mb-5">Portal Agent (Admin)</h2>
-                <table class="w-full text-sm">
-                    <tbody id="admin-list" class="divide-y divide-[rgba(255,255,255,0.05)]"></tbody>
-                </table>
-                <button class="w-full p-4 bg-gray-700 text-white font-bold rounded-xl text-lg mt-6" onclick="showView('v-dash')">FERMER LE PORTAL</button>
+            <div class="glass-card p-6 rounded-3xl border border-yellow-500/30">
+                <h2 class="text-xl font-bold mb-5 text-yellow-500">Validation Agent</h2>
+                <div id="admin-list" class="space-y-3"></div>
+                <button class="w-full p-3 bg-gray-800 rounded-xl mt-6 text-xs" onclick="showView('v-dash')">QUITTER LE MODE AGENT</button>
             </div>
         </div>
 
     </div>
 
-    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] glass-card rounded-3xl p-4 flex justify-around items-center z-[100]">
-        <div class="nav-item active relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-dash', this)"><i class="fas fa-chart-pie"></i></div>
-        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-intel', this)"><i class="fas fa-brain"></i></div>
-        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-depo', this)"><i class="fas fa-plus-circle"></i></div>
-        <div class="nav-item relative text-gray-600 text-xl cursor-pointer p-2 transition duration-300" onclick="showView('v-ret', this)"><i class="fas fa-wallet"></i></div>
+    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] glass-card rounded-3xl p-3 flex justify-around items-center z-[100] border border-white/10">
+        <div class="nav-item active text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-dash', this)"><i class="fas fa-th-large"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-intel', this)"><i class="fas fa-brain"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-depo', this)"><i class="fas fa-qrcode"></i></div>
+        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-ret', this)"><i class="fas fa-arrow-down"></i></div>
     </div>
 
     <script>
-        let balance = 2500.00;
-        let transactions = [
-            { id: 1, date: 'Aujourd\'hui', type: 'IA PROFIT', amt: 12.40, status: 'done' }
+        // --- LOGIQUE CORE & PERSISTANCE ---
+        let balance = parseFloat(localStorage.getItem('v-bal')) || 2500.00;
+        let transactions = JSON.parse(localStorage.getItem('v-tx')) || [
+            { id: 1, date: 'Initial', type: 'WELCOME BONUS', amt: 2500.00, status: 'done' }
         ];
-        const FRAIS_RETRAIT = 0.05; // 5%
 
-        // --- INITIALISATION ---
+        let chart;
+
         window.onload = () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                splash.style.opacity = '0';
-                setTimeout(() => splash.style.visibility = 'hidden', 800);
-            }, 2500);
+            setTimeout(() => { document.getElementById('splash').style.opacity = '0'; 
+            setTimeout(() => document.getElementById('splash').style.display = 'none', 800); }, 2000);
             updateUI();
             initChart();
-            simulateTrading();
-            simulateIntelLogs();
+            startLiveIntel();
         };
+
+        function updateUI() {
+            document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-sm ml-1">MT</span>`;
+            localStorage.setItem('v-bal', balance);
+            localStorage.setItem('v-tx', JSON.stringify(transactions));
+
+            document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
+                <tr class="border-b border-white/5">
+                    <td class="py-4 font-bold text-[10px]">${t.type}</td>
+                    <td class="py-4 text-white font-mono">${t.amt.toFixed(2)}</td>
+                    <td class="py-4 text-right"><span class="status-badge s-${t.status}">${t.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // --- SCANNER SMS INTELLIGENT ---
+        function validateSmartDeposit() {
+            const amt = parseFloat(document.getElementById('in-depo-amt').value);
+            const smsText = document.getElementById('in-depo-sms').value;
+            const btn = event.target;
+
+            if(!amt || smsText.length < 10) return notify("Veuillez remplir tous les champs !");
+
+            btn.innerText = "Analyse IA en cours...";
+            
+            setTimeout(() => {
+                // Simulation d'IA qui cherche le numéro agent et le montant dans le texte
+                const hasAgent = smsText.includes("300032");
+                const hasAmount = smsText.includes(amt.toString());
+
+                if(hasAgent && hasAmount) {
+                    transactions.unshift({ id: Date.now(), date: 'Now', type: 'DEPOT E-MOLA', amt: amt, status: 'wait' });
+                    updateUI();
+                    showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+                    notify("SMS Validé ! En attente de l'agent.");
+                    document.getElementById('in-depo-amt').value = '';
+                    document.getElementById('in-depo-sms').value = '';
+                } else {
+                    notify("Données SMS non concordantes !");
+                }
+                btn.innerText = "VÉRIFIER LE PAIEMENT";
+            }, 2000);
+        }
 
         // --- NAVIGATION ---
         function showView(id, el) {
@@ -183,148 +204,96 @@
             document.getElementById(id).classList.add('active');
             if(el) {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-v-accent'));
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.add('text-gray-600'));
                 el.classList.add('active', 'text-v-accent');
-                el.classList.remove('text-gray-600');
             }
         }
 
-        // --- TOAST NOTIFICATIONS ---
         function notify(text) {
             const t = document.getElementById('toast');
-            t.innerText = text;
-            t.style.top = '20px';
+            t.innerText = text; t.style.top = '20px';
             setTimeout(() => t.style.top = '-64px', 3000);
         }
 
-        // --- RETRAIT : CALCUL DES FRAIS ---
-        document.getElementById('in-ret-amt').addEventListener('input', function() {
-            const amt = parseFloat(this.value);
-            const feePreview = document.getElementById('fee-preview');
-            if(amt > 0) {
-                const frais = (amt * FRAIS_RETRAIT).toFixed(2);
-                const net = (amt - frais).toFixed(2);
-                feePreview.innerText = `Frais (${FRAIS_RETRAIT*100}%): ${frais} MT | Vous recevrez: ${net} MT`;
-                feePreview.classList.remove('text-gray-500'); feePreview.classList.add('text-white');
-            } else {
-                feePreview.innerText = "Frais: 0.00 MT | Net: 0.00 MT";
-                feePreview.classList.remove('text-white'); feePreview.classList.add('text-gray-500');
-            }
-        });
-
-        // --- SUBMIT ACTIONS (Dépôt/Retrait) ---
-        function submitAction(type) {
-            const inputId = type === 'DEPOT' ? 'in-depo-amt' : 'in-ret-amt';
-            const amt = parseFloat(document.getElementById(inputId).value);
-            if(!amt || amt <= 0) return notify("Veuillez entrer un montant valide");
-            if(type === 'RETRAIT' && amt > balance) return notify("Solde insuffisant");
-
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "Analyse en cours...";
-            btn.disabled = true;
-            notify("Vérification sécurisée...");
-            
-            setTimeout(() => {
-                transactions.unshift({ id: Date.now(), date: 'Maintenant', type: type, amt: amt, status: 'wait' });
-                document.getElementById(inputId).value = ''; // Reset input
-                updateUI();
-                showView('v-dash', document.querySelectorAll('.nav-item')[0]);
-                notify("Demande transmise à l'agent");
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }, 2000);
-        }
-
-        // --- ADMIN PROCESS ---
+        // --- ADMIN PORTAL ---
         function accessAdmin() {
-            if(prompt("Code Secret Agent:") === "2024") showView('v-admin');
+            if(prompt("Code Agent (300032):") === "2024") {
+                showView('v-admin');
+                renderAdmin();
+            }
         }
 
-        function process(id, state) {
+        function renderAdmin() {
+            const pending = transactions.filter(t => t.status === 'wait');
+            document.getElementById('admin-list').innerHTML = pending.length ? pending.map(t => `
+                <div class="p-4 bg-white/5 rounded-xl flex justify-between items-center">
+                    <div><div class="text-[10px] text-gray-400">${t.type}</div><div class="font-bold">${t.amt} MT</div></div>
+                    <div class="flex gap-2">
+                        <button onclick="processTx(${t.id}, 'done')" class="p-2 bg-v-accent text-black rounded-lg"><i class="fas fa-check"></i></button>
+                        <button onclick="processTx(${t.id}, 'fail')" class="p-2 bg-red-500 text-white rounded-lg"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+            `).join('') : '<div class="text-center text-gray-500 text-xs py-10 text-italic">Aucune transaction à valider</div>';
+        }
+
+        function processTx(id, state) {
             const tx = transactions.find(t => t.id === id);
             if(state === 'done') {
-                balance = (tx.type === 'DEPOT') ? balance + tx.amt : balance - tx.amt;
+                balance = (tx.type === 'RETRAIT') ? balance - tx.amt : balance + tx.amt;
                 tx.status = 'done';
-                notify("Transaction approuvée !");
             } else {
                 tx.status = 'fail';
-                notify("Transaction refusée");
             }
             updateUI();
+            renderAdmin();
+            notify("Statut mis à jour !");
         }
 
-        // --- SIMULATIONS (Pour le côté vivant) ---
-        function simulateTrading() {
-            setInterval(() => {
-                if(Math.random() > 0.7) {
-                    let profit = (Math.random() * 2).toFixed(2);
-                    balance += parseFloat(profit);
-                    transactions.unshift({ id: Date.now(), date: 'Live', type: 'IA PROFIT', amt: parseFloat(profit), status: 'done' });
-                    if(transactions.length > 6) transactions.pop(); // Garde l'historique propre
-                    updateUI();
-                    // Petit flash vert sur le solde
-                    document.getElementById('display-bal').classList.add('text-v-accent');
-                    setTimeout(() => document.getElementById('display-bal').classList.remove('text-v-accent'), 500);
-                }
-            }, 12000); // Toutes les 12 secondes
-        }
-
-        function simulateIntelLogs() {
-            const logs = document.getElementById('logs');
-            const messages = [
-                "[IA] Recalcul de l'exposition au risque.",
-                "[MARCHÉ] Signal détecté sur EUR/USD.",
-                "[IA] Ajustement de la stratégie de Scalping.",
-                "[VANGUARD] Analyse de sentiment Twitter.",
-                "[RÉSEAU] Optimisation de la latence de l'API."
-            ];
-            setInterval(() => {
-                if(document.getElementById('v-intel').classList.contains('active')) {
-                    const log = document.createElement('div');
-                    log.innerText = messages[Math.floor(Math.random() * messages.length)];
-                    logs.prepend(log); // Ajoute en haut
-                    if(logs.childNodes.length > 15) logs.removeChild(logs.lastChild);
-                }
-            }, 4000); // Toutes les 4 secondes
-        }
-
-        // --- MISE À JOUR INTERFACE ---
-        function updateUI() {
-            document.getElementById('display-bal').innerHTML = `${balance.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-base font-medium ml-1">MT</span>`;
+        function submitAction(type) {
+            const amt = parseFloat(document.getElementById('in-ret-amt').value);
+            if(!amt || amt > balance) return notify("Erreur de montant !");
             
-            document.getElementById('user-trans-list').innerHTML = transactions.map(t => `
-                <tr class="py-3">
-                    <td class="py-3 font-medium">${t.type}</td>
-                    <td class="font-bold text-white">${t.amt.toFixed(2)} MT</td>
-                    <td><span class="status-badge s-${t.status}">${t.status}</span></td>
-                </tr>
-            `).join('');
-
-            const pending = transactions.filter(t => t.status === 'wait');
-            document.getElementById('admin-list').innerHTML = pending.length > 0 ? pending.map(t => `
-                <tr class="py-3">
-                    <td class="py-3 text-white">${t.type} (${t.amt} MT)</td>
-                    <td class="text-right flex gap-2 justify-end">
-                        <button onclick="process(${t.id}, 'done')" class="bg-v-accent text-black font-bold p-2 rounded-lg text-xs hover:scale-105"><i class="fas fa-check"></i></button>
-                        <button onclick="process(${t.id}, 'fail')" class="bg-red-600 text-white font-bold p-2 rounded-lg text-xs hover:scale-105"><i class="fas fa-times"></i></button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="2" class="text-center text-gray-500 py-4">Aucune demande en attente.</td></tr>';
+            transactions.unshift({ id: Date.now(), date: 'Now', type: type, amt: amt, status: 'wait' });
+            updateUI();
+            showView('v-dash', document.querySelectorAll('.nav-item')[0]);
+            notify("Demande de retrait envoyée.");
         }
 
+        // --- GRAPH & LOGS ---
         function initChart() {
-            new ApexCharts(document.querySelector("#main-chart"), {
-                series: [{ name: 'Profit IA', data: [31, 40, 28, 51, 42, 109, 100] }],
-                chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
+            chart = new ApexCharts(document.querySelector("#main-chart"), {
+                series: [{ name: 'Profit', data: [10, 15, 13, 20, 18, 25, 22] }],
+                chart: { height: 120, type: 'area', sparkline: { enabled: true }, animations: { speed: 400 } },
                 colors: ['#00ff85'],
                 stroke: { curve: 'smooth', width: 2 },
-                fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } },
-                tooltip: { enabled: false }
-            }).render();
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } }
+            });
+            chart.render();
+            
+            // Simuler des updates de profit IA
+            setInterval(() => {
+                let newData = [...chart.w.globals.series[0]];
+                newData.push(Math.floor(Math.random() * (30 - 10) + 10));
+                if(newData.length > 10) newData.shift();
+                chart.updateSeries([{ data: newData }]);
+                
+                // Petit profit automatique 
+                if(Math.random() > 0.8) {
+                    let p = 0.5; balance += p; updateUI();
+                }
+            }, 5000);
+        }
+
+        function startLiveIntel() {
+            const l = document.getElementById('logs');
+            const msgs = [">> Analyzing Volatility...", ">> e-Mola Gateway Secure", ">> Signal: BUY EUR/USD", ">> Neural weights adjusted"];
+            setInterval(() => {
+                const d = document.createElement('div');
+                d.innerText = msgs[Math.floor(Math.random()*msgs.length)];
+                l.prepend(d);
+                if(l.children.length > 20) l.lastChild.remove();
+            }, 3000);
         }
     </script>
-
 </body>
-    </html>
-    
+                                                                     </html>
+                    
