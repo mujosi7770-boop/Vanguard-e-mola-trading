@@ -1,323 +1,205 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguard - e-Mola Intelligence v3.0</title>
-    
+    <title>Smart Africa | Serviços Certificados</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'v-bg': '#05070a',
-                        'v-card': 'rgba(22, 27, 40, 0.8)',
-                        'v-accent': '#00ff85',
-                        'v-danger': '#ff4d4d',
-                    }
-                }
-            }
-        }
-    </script>
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #05070a; color: white; overflow-x: hidden; }
-        #splash { transition: opacity 0.8s ease, visibility 0.8s; }
-        .loader { border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid #00ff85; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .glass-card { background: rgba(22, 27, 40, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .nav-item::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 5px; background: #00ff85; border-radius: 50%; transition: width 0.3s; }
-        .nav-item.active::after { width: 5px; }
-        .view { display: none; animation: fadeIn 0.4s ease-out; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .status-badge { font-size: 0.5rem; padding: 1px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-        .s-done { color: #00ff85; background: rgba(0,255,133,0.1); }
-        .s-wait { color: #ffab00; background: rgba(255,171,0,0.1); }
-        .s-fail { color: #ff4d4d; background: rgba(255,77,77,0.1); }
-        .pulse-up { animation: pulseGreen 1s; }
-        .pulse-down { animation: pulseRed 1s; }
-        @keyframes pulseGreen { 0% { color: #00ff85; } 100% { color: white; } }
-        @keyframes pulseRed { 0% { color: #ff4d4d; } 100% { color: white; } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
+        .modal-active { display: flex !important; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="text-slate-200 min-h-screen pb-10">
 
-    <div id="toast" class="fixed -top-16 left-1/2 -translate-x-1/2 bg-v-accent text-black px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-500 z-[10000]">Action réussie !</div>
-
-    <div id="splash" class="fixed inset-0 bg-v-bg flex flex-col justify-center items-center z-[9999]">
-        <div class="loader w-12 h-12 rounded-full mb-6"></div>
-        <h2 class="text-3xl font-black tracking-tighter">VANGUARD</h2>
-        <p class="text-gray-500 mt-2 text-[10px] uppercase tracking-widest italic">Fusion e-Mola Intelligence</p>
-    </div>
-
-    <div id="v-auth" class="fixed inset-0 bg-v-bg z-[5000] p-8 flex flex-col justify-center">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl font-black text-v-accent italic tracking-tighter">VANGUARD</h2>
-            <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em]">Neural Trading Interface</p>
-        </div>
-
-        <div id="form-register" class="space-y-4">
-            <input type="text" id="reg-name" placeholder="Nom Complet" class="w-full p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
-            <div class="flex gap-2">
-                <input type="number" id="reg-tel" placeholder="Movitel (86/87)" class="flex-1 p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
-                <input type="number" id="reg-age" placeholder="Âge" class="w-20 p-4 rounded-xl bg-v-card border border-white/10 outline-none text-sm text-white">
+    <header class="p-5 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-extrabold text-yellow-500 tracking-tighter uppercase text-white">Smart Africa</h1>
+                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none">Maputo • Matola</p>
             </div>
-            <div class="flex gap-2">
-                <input type="text" id="reg-code" placeholder="CODE CLIENT (ex: L.NG)" class="flex-1 p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-sm font-bold text-v-accent uppercase">
-                <input type="password" id="reg-pin" placeholder="PIN" class="w-24 p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-sm text-white text-center">
+            <div class="flex items-center gap-2 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold text-green-500 uppercase">Verificado</span>
             </div>
-            <button onclick="finalizeAuth('register')" class="w-full p-4 bg-v-accent text-black font-extrabold rounded-xl shadow-lg active:scale-95 transition text-sm">ACTIVER MON COMPTE</button>
-            <p class="text-center text-[10px] text-gray-500">Déjà membre ? <span onclick="toggleAuth('login')" class="text-v-accent cursor-pointer underline">Se connecter</span></p>
         </div>
+    </header>
 
-        <div id="form-login" class="space-y-4 hidden text-center">
-            <input type="text" id="log-code" placeholder="VOTRE CODE (ex: L.NG)" class="w-full p-4 rounded-xl bg-v-card border border-v-accent/30 outline-none text-xl font-black text-v-accent text-center uppercase">
-            <input type="password" id="log-pin" placeholder="VOTRE PIN SECRET" class="w-full p-4 rounded-xl bg-v-card border border-white/10 outline-none text-center text-white">
-            <button onclick="finalizeAuth('login')" class="w-full p-4 bg-white text-black font-extrabold rounded-xl active:scale-95 transition text-sm uppercase">Accéder au Terminal</button>
-            <p class="text-center text-[10px] text-gray-500">Nouveau ici ? <span onclick="toggleAuth('register')" class="text-v-accent cursor-pointer underline">Créer un compte</span></p>
+    <main class="max-w-xl mx-auto p-4">
+        <div class="relative my-6">
+            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
+            <input type="text" id="search" autocomplete="off"
+                class="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700 rounded-2xl focus:ring-2 focus:ring-yellow-500 outline-none transition-all placeholder:text-slate-600 text-white"
+                placeholder="O que procura? (Ex: AC, Mecânico, Matola...)">
         </div>
-    </div>
+        <div id="results" class="space-y-4"></div>
+    </main>
 
-    <div class="container max-w-[450px] mx-auto p-5 pb-24">
-        
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-light">Compte <span class="font-bold text-v-accent current-user-code">--</span></h1>
-            <div class="text-[0.6rem] font-bold text-v-accent bg-[rgba(0,255,133,0.1)] px-3 py-1 rounded-full border border-v-accent animate-pulse">● IA LIVE</div>
-        </div>
-
-        <div id="v-dash" class="view active">
-            <div class="glass-card p-6 rounded-3xl mb-6">
-                <div class="flex justify-between items-start mb-2">
-                    <small class="text-gray-400 block uppercase tracking-widest text-[8px]">Bonus Vanguard vs e-Mola (10$)</small>
-                    <div class="text-[9px] text-v-accent font-mono italic">Taux: <span id="current-rate">640.00</span> MT</div>
+    <div id="paymentModal" class="fixed inset-0 bg-slate-950/90 z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-500">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
                 </div>
-                <div id="display-bal" class="text-4xl font-extrabold transition-all">0.00 <span class="text-v-accent text-base ml-1">MT</span></div>
-                <div id="main-chart" class="mt-4"></div>
+                <h2 class="text-xl font-bold text-white">Confirmar Pedido</h2>
+                <p class="text-slate-400 text-sm mt-1">Taxa de conexão: <span id="modalPrice" class="text-yellow-500 font-bold">--</span> MT</p>
             </div>
-            
-            <div class="flex justify-between items-center mb-4 px-1">
-                <h2 class="text-sm font-bold uppercase tracking-tighter italic">Flux Trading Clients</h2>
-                <span onclick="accessAdmin()" class="text-gray-700 text-[9px] cursor-pointer hover:text-v-accent transition uppercase">Agent Portal</span>
-            </div>
-
-            <div class="glass-card p-4 rounded-2xl">
-                <table class="w-full text-xs">
-                    <thead>
-                        <tr class="text-left text-gray-500 uppercase text-[8px] tracking-widest border-b border-white/5">
-                            <th class="pb-3">Client</th>
-                            <th class="pb-3 text-center">Solde Live</th>
-                            <th class="pb-3 text-right">Mouvement</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-trans-list" class="divide-y divide-white/5"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="v-intel" class="view">
-            <h2 class="text-xl font-bold mb-5 italic">Neural Engine</h2>
-            <div class="glass-card p-5 rounded-2xl font-mono text-[9px] text-gray-500 h-80 overflow-y-auto space-y-2" id="logs">
-                <div class="text-v-accent">>> System boot sequence... OK</div>
-            </div>
-        </div>
-
-        <div id="v-depo" class="view">
-            <div class="glass-card p-6 rounded-3xl border border-v-accent/20">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-v-accent italic">RECHARGE</h2>
-                    <span id="depo-client-tag" class="bg-v-accent/10 text-v-accent text-[9px] px-2 py-1 rounded border border-v-accent/30 font-bold uppercase tracking-widest">--</span>
+            <div class="space-y-3 mb-6 text-sm">
+                <div class="flex items-center justify-between p-3 bg-slate-800 rounded-xl border border-slate-700 text-white">
+                    <span class="text-slate-400 font-bold uppercase">M-Pesa</span>
+                    <span class="font-mono font-bold text-yellow-500 text-lg">85 611 3036</span>
                 </div>
-                <p class="text-[10px] text-gray-400 mb-6">Envoyez les fonds au <b>300032</b> via e-Mola, puis validez ci-dessous.</p>
-                <input type="number" id="in-depo-amt" placeholder="Montant MT" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none mb-3 text-sm">
-                <textarea id="in-depo-sms" placeholder="Collez le SMS de confirmation ici..." class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-[9px] text-gray-300 outline-none h-24 mb-4"></textarea>
-                <button class="w-full p-4 bg-v-accent text-black font-bold rounded-xl shadow-lg active:scale-95 transition" onclick="validateSmartDeposit()">ACTIVER LE DÉPÔT</button>
-            </div>
-        </div>
-
-        <div id="v-ret" class="view">
-            <div class="glass-card p-6 rounded-3xl">
-                <h2 class="text-xl font-bold mb-1 italic text-center">RETRAIT SÉCURISÉ</h2>
-                <p class="text-[9px] text-gray-500 text-center mb-6 uppercase tracking-widest font-bold">Session: <span class="current-user-code text-v-accent">--</span></p>
-                <div class="space-y-4">
-                    <input type="number" id="in-ret-amt" placeholder="Montant MT" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none text-sm">
-                    <input type="number" id="in-ret-num" placeholder="Numéro e-Mola (84/85...)" class="w-full p-4 rounded-xl bg-black/50 border border-white/5 text-white outline-none text-sm">
-                    <div class="pt-4 border-t border-white/5">
-                        <label class="text-[8px] text-gray-500 uppercase ml-1">Confirmation PIN Secret</label>
-                        <input type="password" id="retrait-pin-confirm" placeholder="****" class="w-full p-4 rounded-xl bg-v-accent/5 border border-v-accent/20 text-v-accent outline-none text-center font-bold tracking-widest mt-1 text-xl">
-                    </div>
-                    <button class="w-full p-4 bg-white text-black font-extrabold rounded-xl active:scale-95 transition uppercase text-sm" onclick="submitAction('RETRAIT')">Valider le flux</button>
+                <div class="flex items-center justify-between p-3 bg-slate-800 rounded-xl border border-slate-700 text-white">
+                    <span class="text-slate-400 font-bold uppercase">e-Mola</span>
+                    <span class="font-mono font-bold text-orange-500 text-lg">87 321 3896</span>
                 </div>
             </div>
+            <div class="flex flex-col gap-3">
+                <button id="btnConfirm" class="w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-4 rounded-2xl transition shadow-lg uppercase tracking-tighter">SOLICITAR AGORA</button>
+                <button onclick="closeModal()" class="text-slate-500 text-sm font-bold hover:text-white transition">Voltar</button>
+            </div>
         </div>
-
-    </div>
-
-    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] glass-card rounded-3xl p-3 flex justify-around items-center z-[100] border border-white/10 shadow-2xl">
-        <div class="nav-item active text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-dash', this)"><i class="fas fa-th-large"></i></div>
-        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-intel', this)"><i class="fas fa-brain"></i></div>
-        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-depo', this)"><i class="fas fa-qrcode"></i></div>
-        <div class="nav-item text-gray-500 text-xl cursor-pointer p-2" onclick="showView('v-ret', this)"><i class="fas fa-arrow-down"></i></div>
     </div>
 
     <script>
-        const usdRate = 64.00;
-        const tenUsdInMt = 640.00;
-        const clientCodes = ["I.C", "L.NG", "B.G", "M.YV", "IR.A", "V.Z", "X.K"];
-        let currentUser = null;
-        let clients = JSON.parse(localStorage.getItem('v-clients')) || {};
+        const artisans = [
+            // --- ❄️ FRIO ---
+            {id:'F01', cat:'Frio', nome:'Refri-Maputo Lda', tel:'+258 84 235 4805', bairro:'Alto Maé', preco:75, desc:'PME especializada em AC comercial'},
+            {id:'F02', cat:'Frio', nome:'Mestre Momed AC', tel:'+258 84 567 8901', bairro:'Matola T3', preco:30, desc:'Artisan local - Reparação rápida'},
+            {id:'F03', cat:'Frio', nome:'Clima-Moz', tel:'+258 82 300 4567', bairro:'Polana / Sommerschield', preco:100, desc:'PME reconhecida - AVAC industrial'},
+            {id:'F04', cat:'Frio', nome:'Gelo-Tech', tel:'+258 87 123 4567', bairro:'Benfica / Zimpeto', preco:50, desc:'PME - Assistência em geleiras e arcas'},
+            {id:'F05', cat:'Frio', nome:'Assistência Total AC', tel:'+258 84 990 0112', bairro:'Bairro Central', preco:35, desc:'Artisan - Manutenção de split doméstico'},
+            {id:'F06', cat:'Frio', nome:'Frimec SA', tel:'+258 87 600 1001', bairro:'Matola Rio', preco:250, desc:'Grande empresa - Projectos AVAC'},
+            {id:'F07', cat:'Frio', nome:'DR FRIO', tel:'+258 82 450 3321', bairro:'Maputo', preco:50, desc:'PME - Recarga de gás e fugas'},
+            {id:'F08', cat:'Frio', nome:'Eagle-X Lda', tel:'+258 84 600 2211', bairro:'Maputo', preco:50, desc:'PME - Assistência multimarca'},
+            {id:'F19', cat:'Frio', nome:'PolarTech Lda', tel:'+258 85 777 8899', bairro:'Av. Eduardo Mondlane', preco:150, desc:'Grande empresa - Climatização central'},
+            {id:'F24', cat:'Frio', nome:'Mestre Celso Frio', tel:'+258 84 333 5566', bairro:'Laulane', preco:30, desc:'Artisan local - Reparação compressores'},
+            {id:'F25', cat:'Frio', nome:'Arctic Services Lda', tel:'+258 87 444 6677', bairro:'Av. Guerra Popular', preco:200, desc:'Grande empresa - AVAC industrial'},
 
-        // Initialisation des 7 clients fictifs
-        if (Object.keys(clients).length === 0) {
-            clientCodes.forEach(code => {
-                clients[code] = {
-                    code: code,
-                    balance: Math.floor(Math.random() * 5000) + 1000,
-                    secret: "1234",
-                    transactions: [{ id: Date.now(), type: 'BONUS', amt: tenUsdInMt, status: 'done' }]
-                };
+            // --- ⚡ ELÉCTRICA ---
+            {id:'E01', cat:'Elétrica', nome:'Sengelec Moçambique', tel:'+258 84 224 2424', bairro:'Maputo B.O', preco:200, desc:'Grande empresa - Média tensão et quadros'},
+            {id:'E02', cat:'Elétrica', nome:'Electricidade Matola', tel:'+258 84 469 5000', bairro:'Av. Samora Machel', preco:150, desc:'Grande empresa - Assistência certificada'},
+            {id:'E04', cat:'Elétrica', nome:'Electro-Serv MZ', tel:'+258 82 323 5590', bairro:'Machava', preco:50, desc:'PME - Manutenção residencial et industrial'},
+            {id:'E06', cat:'Elétrica', nome:'ElectroShadd', tel:'+258 84 876 4954', bairro:'Malhampsene', preco:50, desc:'PME - Comandos et proteção elétrica'},
+            {id:'E07', cat:'Elétrica', nome:'Electro-Moz-Solar', tel:'+258 84 106 9443', bairro:'Matola', preco:100, desc:'PME - Sistemas solares et inversores'},
+            {id:'E11', cat:'Elétrica', nome:'Electricista João', tel:'+258 84 000 1122', bairro:'Laulane', preco:20, desc:'Artisan - Curtos et tomadas'},
+            {id:'E14', cat:'Elétrica', nome:'Mestre António', tel:'+258 82 111 2233', bairro:'Bairro Central', preco:30, desc:'Artisan - Elétrica residencial 24h'},
+            {id:'E15', cat:'Elétrica', nome:'Mestre Carlos Luz', tel:'+258 84 222 3344', bairro:'Matola Cidade', preco:30, desc:'Artisan - Disjuntores et fiação'},
+
+            // --- 🚰 CANALIZADOR ---
+            {id:'C01', cat:'Canalizador', nome:'Isarte Construções', tel:'+258 84 777 8899', bairro:'Maputo / Matola', preco:75, desc:'PME - Canalização, esgotos et infiltrações'},
+            {id:'C03', cat:'Canalizador', nome:'Furos de Água MZ', tel:'+258 84 000 5544', bairro:'Zimpeto', preco:150, desc:'PME - Furos et bombas submersíveis'},
+            {id:'C04', cat:'Canalizador', nome:'Aderegás Moçambique', tel:'+258 84 795 4014', bairro:'Rua Damião de Góis', preco:120, desc:'PME - Redes de gás et água quente'},
+            {id:'C05', cat:'Canalizador', nome:'Housefix Mozambique', tel:'+258 87 460 4631', bairro:'Rua da Alegria', preco:75, desc:'PME - Reparações hidráulicas'},
+            {id:'C11', cat:'Canalizador', nome:'Mestre Ricardo Picheleiro', tel:'+258 84 333 2211', bairro:'Bairro Central', preco:30, desc:'Artisan - Desentupimentos et torneiras'},
+
+            // --- 🧹 LIMPEZA ---
+            {id:'L04', cat:'Limpeza', nome:'Nemchem Moçambique', tel:'+258 85 010 2048', bairro:'Matola', preco:250, desc:'Grande empresa - Higienização industrial'},
+            {id:'L05', cat:'Limpeza', nome:'Amati Limpeza', tel:'+258 87 606 0770', bairro:'Bairro Fomento', preco:60, desc:'PME - Limpeza et maintenance'},
+            {id:'L11', cat:'Limpeza', nome:'Lava-Sofás Maputo', tel:'+258 82 666 7788', bairro:'Bairro Central', preco:40, desc:'Artisan - Limpeza de estofos'},
+            {id:'L12', cat:'Limpeza', nome:'Dona Brilhante', tel:'+258 84 777 8899', bairro:'Matola Cidade', preco:30, desc:'Artisan - Limpeza diária'},
+
+            // --- 📺 ELECTRÓNICA ---
+            {id:'T01', cat:'Electrónica', nome:'PC Doctor MZ', tel:'+258 82 111 2233', bairro:'Maputo', preco:60, desc:'PME - Reparação de computadores'},
+            {id:'T04', cat:'Electrónica', nome:'Netmoz LDA', tel:'+258 86 382 9820', bairro:'Matola', preco:75, desc:'PME - Redes informáticas et TI'},
+            {id:'T08', cat:'Electrónica', nome:'The GoodGuy', tel:'+258 82 004 0000', bairro:'Av. 24 de Julho', preco:100, desc:'PME - Especialista Apple / High-End'},
+            {id:'T12', cat:'Electrónica', nome:'Reparação TV Led', tel:'+258 84 777 8899', bairro:'Bairro Central', preco:35, desc:'Artisan - Ecrãs et fontes de TV'},
+
+            // --- 🔑 SERRALHEIRO ---
+            {id:'S01', cat:'Serralheiro', nome:'Chaveiro Maputo 24h', tel:'+258 82 111 2233', bairro:'Maputo', preco:150, desc:'Grande empresa - Cofres et chaves'},
+            {id:'S06', cat:'Serralheiro', nome:'Locksmith Maputo', tel:'+258 85 768 5552', bairro:'Av. Maguiguana', preco:80, desc:'PME - Alta segurança'},
+            {id:'S13', cat:'Serralheiro', nome:'Chaveiro Langa', tel:'+258 84 776 7129', bairro:'Rotunda de Khobe', preco:25, desc:'Artisan - Cópia et reparação'},
+
+            // --- 🚗 MECÂNICA ---
+            {id:'M01', cat:'Mecânica', nome:'Auto-Socorro 24h', tel:'+258 82 111 2233', bairro:'Av. Eduardo Mondlane', preco:200, desc:'Grande empresa - Reboque 24h'},
+            {id:'M04', cat:'Mecânica', nome:'MIDAS Matola', tel:'+258 21 788 030', bairro:'Matola Cidade', preco:150, desc:'Grande empresa - Manutenção oficial'},
+            {id:'M11', cat:'Mecânica', nome:'Oficina Mussa', tel:'+258 82 000 1122', bairro:'Bairro Central', preco:60, desc:'PME - Mecânica et motores'},
+            {id:'M14', cat:'Mecânica', nome:'Garagem Móvel Matola', tel:'+258 82 333 4455', bairro:'Matola Gare', preco:40, desc:'Artisan - Socorro mecânico domicílio'}
+        ];
+
+        const container = document.getElementById('results');
+        let currentArtisan = null;
+
+        function render(list) {
+            container.innerHTML = '';
+            if(list.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-500 py-10 italic">Nenhum prestador encontrado...</p>`;
+                return;
+            }
+            list.forEach(a => {
+                container.innerHTML += `
+                    <div class="bg-slate-800/40 border border-slate-700/50 p-5 rounded-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-[10px] font-black uppercase text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-md mb-2 inline-block">${a.cat}</span>
+                                <h3 class="text-lg font-bold text-white">${a.nome}</h3>
+                                <p class="text-slate-400 text-xs mt-1 mb-2">${a.desc}</p>
+                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i> ${a.bairro}</p>
+                            </div>
+                            <div class="text-right pl-2">
+                                <p class="text-xl font-black text-white">${a.preco}<span class="text-[10px] ml-0.5 text-slate-500 uppercase">MT</span></p>
+                            </div>
+                        </div>
+                        <button onclick="openModal('${a.id}')" class="w-full py-3 bg-slate-700 hover:bg-yellow-500 hover:text-black rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 uppercase tracking-tighter">
+                            Solicitar Contacto <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>`;
             });
+            lucide.createIcons();
         }
 
-        window.onload = () => {
-            setTimeout(() => { 
-                document.getElementById('splash').style.opacity = '0'; 
-                setTimeout(() => document.getElementById('splash').style.display = 'none', 800); 
-            }, 2000);
-            updateUI();
-            initChart();
-            startLiveTrading();
+        function openModal(id) {
+            currentArtisan = artisans.find(a => a.id === id);
+            document.getElementById('modalPrice').innerText = currentArtisan.preco;
+            document.getElementById('paymentModal').classList.add('modal-active');
+        }
+
+        function closeModal() { document.getElementById('paymentModal').classList.remove('modal-active'); }
+
+        document.getElementById('btnConfirm').onclick = () => {
+            const mpesaAdmin = '856113036';
+            const emolaAdmin = '873213896';
+            
+            // ALGORITHME +1 (Cacher le numéro)
+            let rawNum = currentArtisan.tel.replace(/\s/g, '').replace('+258', '');
+            let secureCode = rawNum.split('').map(n => (parseInt(n) + 1) % 10).join('');
+            
+            // MESSAGE AUTOMATIQUE STRUCTURÉ (Rappel de paiement inclus)
+            const textMsg = `*PEDIDO DE CONTACTO - SMART AFRICA*
+---------------------------------------
+*ID:* ${currentArtisan.id}
+*PRESTADOR:* ${currentArtisan.nome}
+*TAXA DE CONEXÃO:* ${currentArtisan.preco} MT
+*TRACKING:* SA-${secureCode}
+---------------------------------------
+Olá! Gostaria de solicitar o contacto deste profissional. 
+
+Para validar o meu pedido, vou enviar agora o valor de *${currentArtisan.preco} MT* para:
+🟢 *M-Pesa:* ${mpesaAdmin}
+🟠 *e-Mola:* ${emolaAdmin}
+
+Assim que o pagamento for confirmado, por favor envie-me o contacto directo. Obrigado!`;
+
+            window.open(`https://wa.me/258${mpesaAdmin}?text=${encodeURIComponent(textMsg)}`);
+            closeModal();
         };
 
-        function toggleAuth(mode) {
-            document.getElementById('form-register').classList.toggle('hidden', mode === 'login');
-            document.getElementById('form-login').classList.toggle('hidden', mode === 'register');
-        }
+        // RECHERCHE OPTIMISÉE
+        document.getElementById('search').oninput = (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = artisans.filter(a => 
+                a.nome.toLowerCase().includes(query) || 
+                a.cat.toLowerCase().includes(query) || 
+                a.bairro.toLowerCase().includes(query) ||
+                a.desc.toLowerCase().includes(query)
+            );
+            render(filtered);
+        };
 
-        function finalizeAuth(mode) {
-            const code = document.getElementById(mode === 'register' ? 'reg-code' : 'log-code').value.toUpperCase();
-            const pin = document.getElementById(mode === 'register' ? 'reg-pin' : 'log-pin').value;
-
-            if (mode === 'register') {
-                if(!code || !pin) return notify("Champs requis !");
-                clients[code] = { code, balance: tenUsdInMt, secret: pin, transactions: [{ id: Date.now(), type: 'BONUS', amt: tenUsdInMt, status: 'done' }] };
-            } else {
-                if(!clients[code] || clients[code].secret !== pin) return notify("Accès refusé !");
-            }
-
-            currentUser = code;
-            document.getElementById('v-auth').style.display = 'none';
-            document.querySelectorAll('.current-user-code').forEach(el => el.innerText = currentUser);
-            document.getElementById('depo-client-tag').innerText = "ID: " + currentUser;
-            updateUI();
-        }
-
-        function updateUI(activeCode = null, variation = 0) {
-            let total = 0;
-            let html = "";
-            clientCodes.forEach(code => {
-                const c = clients[code];
-                total += c.balance;
-                const last = c.transactions[0] || {type: 'NA', amt: 0, status: 'done'};
-                const isChanging = code === activeCode;
-
-                html += `
-                    <tr class="transition-all duration-300 ${isChanging ? 'bg-v-accent/5' : ''}">
-                        <td class="py-4">
-                            <div class="font-bold ${isChanging ? 'text-v-accent' : 'text-white'}">${c.code}</div>
-                            <div class="text-[7px] text-gray-600 uppercase">Live link</div>
-                        </td>
-                        <td class="py-4 text-center">
-                            <div class="font-mono font-bold ${isChanging ? (variation > 0 ? 'pulse-up' : 'pulse-down') : 'text-white'}">
-                                ${c.balance.toFixed(2)}
-                            </div>
-                            <div class="text-[8px] text-gray-500">${(c.balance/usdRate).toFixed(2)} $</div>
-                        </td>
-                        <td class="py-4 text-right">
-                            <div class="text-[9px] font-bold ${variation > 0 ? 'text-v-accent' : 'text-red-500'}">${isChanging ? (variation > 0 ? '+':'') + variation : ''}</div>
-                            <span class="status-badge s-${last.status}">${last.type}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('display-bal').innerHTML = `${total.toLocaleString('fr-FR', {minimumFractionDigits:2})} <span class="text-v-accent text-sm ml-1">MT</span>`;
-            document.getElementById('user-trans-list').innerHTML = html;
-            localStorage.setItem('v-clients', JSON.stringify(clients));
-        }
-
-        function startLiveTrading() {
-            setInterval(() => {
-                const code = clientCodes[Math.floor(Math.random() * clientCodes.length)];
-                const variation = parseFloat((Math.random() * 4 - 1).toFixed(2));
-                clients[code].balance += variation;
-                updateUI(code, variation);
-            }, 3000);
-        }
-
-        function submitAction(type) {
-            const amt = parseFloat(document.getElementById('in-ret-amt').value);
-            const pin = document.getElementById('retrait-pin-confirm').value;
-
-            if(!amt || amt > clients[currentUser].balance) return notify("Solde insuffisant !");
-            if(pin !== clients[currentUser].secret) return notify("PIN INCORRECT !");
-
-            const isInstant = Math.random() > 0.3;
-            if(isInstant) clients[currentUser].balance -= amt;
-
-            clients[currentUser].transactions.unshift({ id: Date.now(), type, amt, status: isInstant ? 'done' : 'wait' });
-            
-            document.getElementById('retrait-pin-confirm').value = '';
-            updateUI();
-            showView('v-dash', document.querySelectorAll('.nav-item')[0]);
-            notify(isInstant ? "Retrait Instantané (IA OK)" : "Vérification Agent requise");
-        }
-
-        function validateSmartDeposit() {
-            const amt = parseFloat(document.getElementById('in-depo-amt').value);
-            const sms = document.getElementById('in-depo-sms').value;
-            if(sms.includes("300032") && sms.includes(amt.toString())) {
-                clients[currentUser].transactions.unshift({ id: Date.now(), type: 'DEPOT', amt, status: 'wait' });
-                updateUI();
-                showView('v-dash', document.querySelectorAll('.nav-item')[0]);
-                notify("SMS Validé par l'IA.");
-            } else {
-                notify("Données non concordantes !");
-            }
-        }
-
-        function showView(id, el) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(el) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-v-accent'));
-                el.classList.add('active', 'text-v-accent');
-            }
-        }
-
-        function notify(text) {
-            const t = document.getElementById('toast');
-            t.innerText = text; t.style.top = '20px';
-            setTimeout(() => t.style.top = '-64px', 3000);
-        }
-
-        function initChart() {
-            new ApexCharts(document.querySelector("#main-chart"), {
-                series: [{ name: 'Profit', data: [10, 25, 20, 30, 25, 40] }],
-                chart: { height: 100, type: 'area', sparkline: { enabled: true } },
-                colors: ['#00ff85'],
-                stroke: { curve: 'smooth', width: 2 },
-                fill: { type: 'gradient', gradient: { opacityFrom: 0.3, opacityTo: 0 } }
-            }).render();
-        }
+        render(artisans);
     </script>
 </body>
 </html>
-
-
-
-    
